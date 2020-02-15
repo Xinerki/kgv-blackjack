@@ -1,6 +1,12 @@
 fx_version 'adamant'
 game "gta5"
-shared_script  'coords.lua'
+
+name 'kgv-blackjack'
+description 'Playable Blackjack at the casino, similar to GTAOnline.'
+author 'Xinerki - https://github.com/Xinerki/'
+url 'https://github.com/Xinerki/kgv-blackjack'
+
+shared_script 'coords.lua'
 client_script 'client.lua'
 server_script 'server.lua'
 
