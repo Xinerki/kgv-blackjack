@@ -35,6 +35,10 @@ customTables = {
 		coords = vector4(-75.35, -819.15, 325.1436, 0.0),
 		highStakes = true
 	},
+	-- {
+		-- coords = vector4(7238.65, 246.4, 9.2, -42.8),
+		-- highStakes = true
+	-- },
 }
 
 for i,v in pairs(customTables) do
