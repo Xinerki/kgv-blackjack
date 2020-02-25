@@ -74,6 +74,52 @@ function CanSplitHand(hand)
 	return _DEBUG
 end
 
+--[[
+	vw_prop_vw_chips_pile_01a.ydr -- $511,000
+	vw_prop_vw_chips_pile_02a.ydr -- $3,250,000
+	vw_prop_vw_chips_pile_03a.ydr -- $1,990,000
+--]]
+
+function getChips(amount)
+	if amount <= 500000 then
+		local props = {}
+		local propTypes = {}
+
+		local d = #chipValues
+
+		for i = 1, #chipValues do
+			local iter = #props + 1
+			while amount >= chipValues[d] do
+				local model = chipModels[chipValues[d]]
+
+				if not props[iter] then
+					local propType = string.sub(model, 0, string.len(model) - 3)
+
+					if propTypes[propType] then
+						iter = propTypes[propType]
+					else
+						props[iter] = {}
+						propTypes[propType] = iter
+					end
+				end
+
+				props[iter][#props[iter] + 1] = model
+				amount = amount - chipValues[d]
+			end
+
+			d = d - 1
+		end
+
+		return props
+	elseif amount < 1000000 then
+		return { { `vw_prop_vw_chips_pile_01` } }
+	elseif amount < 5000000 then
+		return { { `vw_prop_vw_chips_pile_03a` } }
+	else
+		return { { `vw_prop_vw_chips_pile_02a` } }
+	end
+end
+
 RegisterCommand("bet", function(source, args, rawCommand)
 	if args[1] and _DEBUG == true then
 		TriggerServerEvent("BLACKJACK:SetPlayerBet", g_seat, closestChair, args[1])
@@ -408,31 +454,77 @@ selectedBet = 1
 RegisterNetEvent("BLACKJACK:PlaceBetChip")
 AddEventHandler("BLACKJACK:PlaceBetChip", function(index, seat, bet, double, split)
 	Citizen.CreateThread(function()
-	
-		local model = GetHashKey(chipModels2[bet])
-		
-		DebugPrint(bet)
-		DebugPrint(seat)
-		DebugPrint(tostring(chipModels2[bet]))
-		DebugPrint(tostring(chipOffsets[seat]))
-	
-		RequestModel(model)
-		repeat Wait(0) until HasModelLoaded(model)
-	
-		local location = 1
-		if double == true then location = 2 end
-		
-		local chip = CreateObjectNoOffset(model, tables[index].coords.x, tables[index].coords.y, tables[index].coords.z, false, false, false)
-		
-		table.insert(spawnedObjects, chip)
-		table.insert(chips[index][seat], chip)
-		
-		if split == false then
-			SetEntityCoordsNoOffset(chip, GetObjectOffsetFromCoords(tables[index].coords.x, tables[index].coords.y, tables[index].coords.z, tables[index].coords.w, chipOffsets[seat][location].x, chipOffsets[seat][location].y, chipHeights[1]))
-			SetEntityRotation(chip, 0.0, 0.0, tables[index].coords.w + chipRotationOffsets[seat][2].z)
-		else
-			SetEntityCoordsNoOffset(chip, GetObjectOffsetFromCoords(tables[index].coords.x, tables[index].coords.y, tables[index].coords.z, tables[index].coords.w, chipSplitOffsets[seat][2].x, chipSplitOffsets[seat][2].y, chipHeights[1]))
-			SetEntityRotation(chip, 0.0, 0.0, tables[index].coords.w + chipSplitRotationOffsets[seat][1].z)
+		local props = getChips(bet)
+		local chipXOffset = 0.0
+		local chipYOffset = 0.0
+			
+		for i = 1, #props do
+			local chipGap = 0.0
+
+			for j = 1, #props[i] do
+				local model = GetHashKey(props[i][j])
+				
+				DebugPrint(bet)
+				DebugPrint(seat)
+				DebugPrint(tostring(props[i][j]))
+				DebugPrint(tostring(chipOffsets[seat]))
+			
+				RequestModel(model)
+				repeat Wait(0) until HasModelLoaded(model)
+			
+				local location = 1
+				if double == true then location = 2 end
+				
+				local chip = CreateObjectNoOffset(model, tables[index].coords.x, tables[index].coords.y, tables[index].coords.z, false, false, false)
+				
+				table.insert(spawnedObjects, chip)
+				table.insert(chips[index][seat], chip)
+
+				if split == false then
+					SetEntityCoordsNoOffset(chip, GetObjectOffsetFromCoords(tables[index].coords.x, tables[index].coords.y, tables[index].coords.z, tables[index].coords.w, chipOffsets[seat][location].x + chipXOffset, chipOffsets[seat][location].y + chipYOffset, chipHeights[1] + chipGap))
+					SetEntityRotation(chip, 0.0, 0.0, tables[index].coords.w + chipRotationOffsets[seat][2].z)
+				else
+					SetEntityCoordsNoOffset(chip, GetObjectOffsetFromCoords(tables[index].coords.x, tables[index].coords.y, tables[index].coords.z, tables[index].coords.w, chipSplitOffsets[seat][2].x + chipXOffset, chipSplitOffsets[seat][2].y + chipYOffset, chipHeights[1] + chipGap))
+					SetEntityRotation(chip, 0.0, 0.0, tables[index].coords.w + chipSplitRotationOffsets[seat][1].z)
+				end
+
+				chipGap = chipGap + ((chipThickness[model] ~= nil) and chipThickness[model] or 0.0)
+			end
+
+			-- Hacky way to setup each seats split chips
+			if seat == 1 then
+				if split == false then
+					chipXOffset = chipXOffset - 0.03
+					chipYOffset = chipYOffset - 0.05
+				else
+					chipXOffset = chipXOffset + 0.03
+					chipYOffset = chipYOffset + 0.05				
+				end
+			elseif seat == 2 then
+				if split == false then
+					chipXOffset = chipXOffset - 0.05
+					chipYOffset = chipYOffset - 0.02
+				else
+					chipXOffset = chipXOffset + 0.05
+					chipYOffset = chipYOffset + 0.02						
+				end
+			elseif seat == 3 then
+				if split == false then
+					chipXOffset = chipXOffset - 0.05
+					chipYOffset = chipYOffset + 0.02
+				else
+					chipXOffset = chipXOffset + 0.05
+					chipYOffset = chipYOffset - 0.02						
+				end
+			elseif seat == 4 then
+				if split == false then
+					chipXOffset = chipXOffset - 0.02
+					chipYOffset = chipYOffset + 0.05
+				else
+					chipXOffset = chipXOffset + 0.02
+					chipYOffset = chipYOffset - 0.05
+				end
+			end
 		end
 	end)
 end)
@@ -490,7 +582,7 @@ AddEventHandler("BLACKJACK:RequestBets", function(index)
 				return
 			end
 			
-			bet = bettingNums[selectedBet] or 34404
+			bet = bettingNums[selectedBet] or 10000
 			if tables[scrollerIndex].highStakes == true then bet = bet * 10 end
 			
 			DisplayHelpText("CURRENT BET:\n"..bet, -1)
