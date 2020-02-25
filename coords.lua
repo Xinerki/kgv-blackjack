@@ -413,90 +413,83 @@ bettingNums = {
 	50000,
 }
 
+--[[
+	case 10:
+		return joaat("vw_prop_chip_10dollar_x1");
+	case 50:
+		return joaat("vw_prop_chip_50dollar_x1");
+	case 100:
+		return joaat("vw_prop_chip_100dollar_x1");
+	case 500:
+		return joaat("vw_prop_chip_500dollar_x1");
+	case 1000:
+		return joaat("vw_prop_chip_1kdollar_x1");
+	case 5000:
+		return joaat("vw_prop_plaq_5kdollar_x1");
+	case 10000:
+		return joaat("vw_prop_plaq_10kdollar_x1");
+
+		vw_prop_chip_10kdollar_x1.ydr
+		vw_prop_chip_5kdollar_x1.ydr
+		vw_prop_chip_10kdollar_st.ydr -- $120,000
+		vw_prop_chip_5kdollar_st.ydr -- $60,000
+		vw_prop_vw_chips_pile_01a.ydr -- $511,000
+		vw_prop_vw_chips_pile_02a.ydr -- $3,250,000
+		vw_prop_vw_chips_pile_03a.ydr -- $1,990,000
+
+--]]
+
 chipModels = {
-	"vw_prop_chip_10dollar_x1",
-	"vw_prop_chip_10dollar_st",
-	"vw_prop_chip_10dollar_st",
-	"vw_prop_chip_10dollar_st",
-	"vw_prop_chip_50dollar_x1",
-	"vw_prop_chip_10dollar_st",
-	"vw_prop_chip_10dollar_st",
-	"vw_prop_chip_10dollar_st",
-	"vw_prop_chip_10dollar_st",
-	"vw_prop_chip_100dollar_x1",
-	"vw_prop_chip_50dollar_st",
-	"vw_prop_chip_100dollar_st",
-	"vw_prop_chip_50dollar_st",
-	"vw_prop_chip_100dollar_st",
-	"vw_prop_chip_50dollar_st",
-	"vw_prop_chip_100dollar_st",
-	"vw_prop_chip_50dollar_st",
-	"vw_prop_chip_500dollar_x1",
-	"vw_prop_chip_1kdollar_x1",
-	"vw_prop_chip_500dollar_st",
-	"vw_prop_chip_1kdollar_st",
-	"vw_prop_chip_500dollar_st",
-	"vw_prop_chip_1kdollar_st",
-	"vw_prop_chip_500dollar_st",
-	"vw_prop_chip_1kdollar_st",
-	"vw_prop_chip_500dollar_st",
-	"vw_prop_chip_5kdollar_x1",
-	"vw_prop_chip_1kdollar_st",
-	"vw_prop_chip_1kdollar_st",
-	"vw_prop_chip_1kdollar_st",
-	"vw_prop_chip_1kdollar_st",
-	"vw_prop_chip_10kdollar_x1",
-	"vw_prop_chip_5kdollar_st",
-	"vw_prop_chip_10kdollar_st",
-	"vw_prop_chip_5kdollar_st",
-	"vw_prop_chip_10kdollar_st",
-	"vw_prop_chip_5kdollar_st",
-	"vw_prop_chip_10kdollar_st",
-	"vw_prop_chip_5kdollar_st",
-	"vw_prop_chip_10kdollar_st",
+	[10] = "vw_prop_chip_10dollar_x1",
+	[50] = "vw_prop_chip_50dollar_x1",
+	[100] = "vw_prop_chip_100dollar_x1",
+	[120] = "vw_prop_chip_10dollar_st",
+	[500] = "vw_prop_chip_500dollar_x1",
+	[600] = "vw_prop_chip_50dollar_st",
+	[1000] = "vw_prop_chip_1kdollar_x1",
+	[1200] = "vw_prop_chip_100dollar_st",
+	[5000] = "vw_prop_chip_5kdollar_x1",
+	[6000] = "vw_prop_chip_500dollar_st",
+	[10000] = "vw_prop_chip_10kdollar_x1",
+	[60000] = "vw_prop_chip_5kdollar_st",
+	[120000] = "vw_prop_chip_10kdollar_st",
 }
 
-chipModels2 = {
-	"vw_prop_chip_10dollar_x1",
-	"vw_prop_chip_10dollar_st",
-	"vw_prop_chip_10dollar_st",
-	"vw_prop_chip_10dollar_st",
-	"vw_prop_chip_50dollar_x1",
-	"vw_prop_chip_10dollar_st",
-	"vw_prop_chip_10dollar_st",
-	"vw_prop_chip_10dollar_st",
-	"vw_prop_chip_10dollar_st",
-	"vw_prop_chip_100dollar_x1",
-	"vw_prop_chip_50dollar_st",
-	"vw_prop_chip_100dollar_st",
-	"vw_prop_chip_50dollar_st",
-	"vw_prop_chip_100dollar_st",
-	"vw_prop_chip_50dollar_st",
-	"vw_prop_chip_100dollar_st",
-	"vw_prop_chip_50dollar_st",
-	"vw_prop_chip_500dollar_x1",
-	"vw_prop_chip_1kdollar_x1",
-	"vw_prop_chip_500dollar_st",
-	"vw_prop_chip_1kdollar_st",
-	"vw_prop_chip_500dollar_st",
-	"vw_prop_chip_1kdollar_st",
-	"vw_prop_chip_500dollar_st",
-	"vw_prop_chip_1kdollar_st",
-	"vw_prop_chip_500dollar_st",
-	"vw_prop_plaq_5kdollar_x1",
-	"vw_prop_chip_1kdollar_st",
-	"vw_prop_chip_1kdollar_st",
-	"vw_prop_chip_1kdollar_st",
-	"vw_prop_chip_1kdollar_st",
-	"vw_prop_plaq_10kdollar_x1",
-	"vw_prop_plaq_5kdollar_st",
-	"vw_prop_plaq_10kdollar_st",
-	"vw_prop_plaq_5kdollar_st",
-	"vw_prop_plaq_10kdollar_st",
-	"vw_prop_plaq_5kdollar_st",
-	"vw_prop_plaq_10kdollar_st",
-	"vw_prop_plaq_5kdollar_st",
-	"vw_prop_plaq_10kdollar_st",
+chipValues = {
+	10,
+	50,
+	100,
+	120,
+	500,
+	600,
+	1000,
+	1200,
+	5000,
+	6000,
+	10000,
+	60000,
+	120000,
+}
+
+chipThickness = {
+	[`vw_prop_chip_10dollar_x1`] = 0.0054170000366867,
+	[`vw_prop_chip_50dollar_x1`] = 0.0056730001233518,
+	[`vw_prop_chip_100dollar_x1`] = 0.0056900000199676,
+	[`vw_prop_chip_10dollar_st`] = 0.061421997845173,
+	[`vw_prop_chip_500dollar_x1`] = 0.0057030003517866,
+	[`vw_prop_chip_50dollar_st`] = 0.061151999980211,
+	[`vw_prop_chip_1kdollar_x1`] = 0.0056910002604127,
+	[`vw_prop_chip_100dollar_st`] = 0.060908999294043,
+	[`vw_prop_chip_500dollar_st`] = 0.060989998281002,
+
+	[`vw_prop_chip_5kdollar_x1`] = 0.005538,
+	[`vw_prop_chip_10kdollar_x1`] = 0.005562,
+	[`vw_prop_chip_5kdollar_st`] = 0.061049,
+	[`vw_prop_chip_10kdollar_st`] = 0.06095,	
+	[`vw_prop_plaq_5kdollar_x1`] = 0.006891000084579,
+	[`vw_prop_plaq_10kdollar_x1`] = 0.0057889996096492,
+	[`vw_prop_plaq_5kdollar_st`] = 0.060949999839067,
+	[`vw_prop_plaq_10kdollar_st`] = 0.060749001801014,
 }
 
 chipHeights = {

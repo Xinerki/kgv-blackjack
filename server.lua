@@ -144,7 +144,7 @@ function SetPlayerBet(i, seat, bet, betId, double, split)
 			players[i][num].bet = tonumber(bet)			
 		end
 		
-		TriggerClientEvent("BLACKJACK:PlaceBetChip", -1, i, 5-seat, betId, double, split)
+		TriggerClientEvent("BLACKJACK:PlaceBetChip", -1, i, 5-seat, bet, double, split)
 	else
 		DebugPrint("TABLE "..i..": PLAYER "..source.." ATTEMPTED BET BUT NO LONGER TRACKED?")
 	end
