@@ -222,13 +222,17 @@ Citizen.CreateThread(function()
 end)
 
 function IsSeatOccupied(coords, radius)
-	for i=0,128 do
-        if i ~= PlayerId() then
-			if IsEntityAtCoord(GetPlayerPed(i), coords, radius, radius, radius, 0, 0, 0) then
+	local players = GetActivePlayers()
+	local playerId = PlayerId()
+	for i = 1, #players do
+		if players[i] ~= playerId then
+			local ped = GetPlayerPed(players[i])
+			if IsEntityAtCoord(ped, coords, radius, radius, radius, 0, 0, 0) then
 				return true
 			end
 		end
 	end
+
 	return false
 end
 
