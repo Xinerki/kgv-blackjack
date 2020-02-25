@@ -765,7 +765,7 @@ end)
 
 RegisterNetEvent("BLACKJACK:RetrieveCards")
 AddEventHandler("BLACKJACK:RetrieveCards", function(i, seat)
-
+	DebugPrint("TABLE "..i..": DELETE SEAT ".. seat .." CARDS")
 	-- if g_seat == i then 
 		-- for z,v in pairs(chips[i]) do
 			-- if v then
