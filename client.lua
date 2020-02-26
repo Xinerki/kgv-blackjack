@@ -112,11 +112,11 @@ function getChips(amount)
 
 		return props
 	elseif amount <= 500000 then
-		return { { `vw_prop_vw_chips_pile_01a` } }
+		return { { "vw_prop_vw_chips_pile_01a" } }
 	elseif amount <= 5000000 then
-		return { { `vw_prop_vw_chips_pile_03a` } }
+		return { { "vw_prop_vw_chips_pile_03a" } }
 	else
-		return { { `vw_prop_vw_chips_pile_02a` } }
+		return { { "vw_prop_vw_chips_pile_02a" } }
 	end
 end
 
