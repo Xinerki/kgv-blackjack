@@ -26,14 +26,24 @@ tables = {
 	},
 }
 
+--[[
+	Table colors
+	0: Green
+	1: Red
+	2: Blue
+	3: Purple
+--]]
+
 customTables = {
 	{
 		coords = vector4(-287.6049, -956.4222, 85.2936, 69.5003),
-		highStakes = false
+		highStakes = false,
+		color = 0,
 	},
 	{
 		coords = vector4(-75.35, -819.15, 325.1436, 0.0),
-		highStakes = true
+		highStakes = true,
+		color = 3,
 	},
 	-- {
 		-- coords = vector4(7238.65, 246.4, 9.2, -42.8),
