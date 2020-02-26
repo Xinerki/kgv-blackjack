@@ -349,6 +349,35 @@ chipOffsets = {
 	}
 }
 
+pileOffsets = {
+	[1] = {
+		vector3(0.61, -0.02, 0.0),
+		vector3(0.73, 0.47, 0.0),
+		vector3(0.756775, 0.292775, 0.0),
+		vector3(0.701875, 0.3439, 0.0),
+	},
+	
+	[2] = {
+		vector3(0.03, -0.29, 0.0),
+		vector3(0.05, -0.06, 0.0),
+		vector3(0.397775, -0.208525, 0.0),
+		vector3(0.39715, -0.1354, 0.0),
+	},
+	
+	[3] = {
+		vector3(-0.48, -0.13, 0.0),
+		vector3(-0.35, 0.07, 0.0),
+		vector3(-0.186575, -0.2861, 0.0),
+		vector3(-0.141675, -0.237925, 0.0),
+	},
+	
+	[4] = {
+		vector3(-0.7, 0.32, 0.0),
+		vector3(-0.7, 0.53, 0.0),
+		vector3(-0.6783, 0.0744, 0.0),
+		vector3(-0.604425, 0.082575, 0.0),
+	}
+}
 
 chipRotationOffsets = { -- doesnt have to be vector3
 	[1] = {
@@ -375,6 +404,36 @@ chipRotationOffsets = { -- doesnt have to be vector3
 	[4] = {
 		vector3(0, 0, -79.2),
 		vector3(0, 0, -68.76),
+		vector3(0, 0, -57.6),
+		vector3(0, 0, -64.8),
+	}
+}
+
+pileRotationOffsets = { -- doesnt have to be vector3
+	[1] = {
+		vector3(0, 0, 8.1),
+		vector3(0, 0, 229.49),
+		vector3(0, 0, 74.52),
+		vector3(0, 0, 72.0),
+	},
+	
+	[2] = {
+		vector3(0, 0, 78.7),
+		vector3(0, 0, 4.6),
+		vector3(0, 0, 32.04),
+		vector3(0, 0, 32.04),
+	},
+	
+	[3] = {
+		vector3(0, 0, 44.89),
+		vector3(0, 0, 144.49),
+		vector3(0, 0, -15.48),
+		vector3(0, 0, -18.0),
+	},
+	
+	[4] = {
+		vector3(0, 0, 15.6),
+		vector3(0, 0, 15.6),
 		vector3(0, 0, -57.6),
 		vector3(0, 0, -64.8),
 	}

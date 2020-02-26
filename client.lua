@@ -110,13 +110,13 @@ function getChips(amount)
 			d = d - 1
 		end
 
-		return props
+		return false, props
 	elseif amount <= 500000 then
-		return { { "vw_prop_vw_chips_pile_01a" } }
+		return true, "vw_prop_vw_chips_pile_01a"
 	elseif amount <= 5000000 then
-		return { { "vw_prop_vw_chips_pile_03a" } }
+		return true, "vw_prop_vw_chips_pile_03a"
 	else
-		return { { "vw_prop_vw_chips_pile_02a" } }
+		return true, "vw_prop_vw_chips_pile_02a"
 	end
 end
 
@@ -451,78 +451,162 @@ end)
 
 selectedBet = 1
 
+--[[
+	--Get chip offsets
+	Citizen.CreateThread(function()
+		local selectedOffset = { x=0.0, y=0.0, z=0.0 }
+		while true do
+			Citizen.Wait(0)
+
+			if selectedTable and selectedChip then
+				if IsControlPressed(1, 108) then -- y-selectedOffset.x, selectedOffset.y
+					selectedOffset.y = selectedOffset.y - 0.01
+				end
+
+				if IsControlPressed(1, 107) then -- y+
+					selectedOffset.y = selectedOffset.y + 0.01
+				end
+
+				if IsControlPressed(1, 111) then -- x-
+					selectedOffset.x = selectedOffset.x - 0.01
+				end
+
+				if IsControlPressed(1, 112) then -- x+
+					selectedOffset.x = selectedOffset.x + 0.01
+				end
+
+				if IsControlPressed(1, 117) then -- rotate left
+					selectedOffset.z = selectedOffset.z - 0.1
+					if selectedOffset.z < 0 then selectedOffset.z = 360.0 end
+				end
+
+				if IsControlPressed(1, 118) then -- rotate right
+					selectedOffset.z = selectedOffset.z + 0.1
+					if selectedOffset.z > 360 then selectedOffset.z = 0.0 end
+				end
+
+				SetEntityCoordsNoOffset(selectedChip, GetObjectOffsetFromCoords(tables[selectedTable].coords.x, tables[selectedTable].coords.y, tables[selectedTable].coords.z, tables[selectedTable].coords.w, selectedOffset.x, selectedOffset.y, chipHeights[1]))
+				SetEntityRotation(selectedChip, 0.0, 0.0, tables[selectedTable].coords.w + selectedOffset.z)
+
+				SetTextScale(0.5, 0.5)
+				SetTextColour(255,255,255,255)
+				SetTextDropShadow(0, 0, 0, 0,255)
+				SetTextEdge(1, 0, 0, 0, 255)
+				SetTextDropShadow()
+				SetTextOutline()
+				SetTextEntry("STRING")
+				AddTextComponentString("~b~"..selectedOffset.x..", "..selectedOffset.y..", "..selectedOffset.z)
+				DrawText(0.3,0.8)
+			end
+		end
+	end)
+--]]
+
 RegisterNetEvent("BLACKJACK:PlaceBetChip")
 AddEventHandler("BLACKJACK:PlaceBetChip", function(index, seat, bet, double, split)
 	Citizen.CreateThread(function()
-		local props = getChips(bet)
-		local chipXOffset = 0.0
-		local chipYOffset = 0.0
+		local chipPile, props = getChips(bet)
+		
+		if chipPile then
+			local model = GetHashKey(props)
 			
-		for i = 1, #props do
-			local chipGap = 0.0
-
 			for j = 1, #props[i] do
-				local model = GetHashKey(props[i][j])
-				
-				DebugPrint(bet)
-				DebugPrint(seat)
-				DebugPrint(tostring(props[i][j]))
-				DebugPrint(tostring(chipOffsets[seat]))
+			DebugPrint(bet)
+			DebugPrint(seat)
+			DebugPrint(tostring(props))
+			DebugPrint(tostring(pileOffsets[seat]))
+		
+			RequestModel(model)
+			repeat Wait(0) until HasModelLoaded(model)
 			
-				RequestModel(model)
-				repeat Wait(0) until HasModelLoaded(model)
+			if double == true then location = 2 end
 			
-				local location = 1
-				if double == true then location = 2 end
-				
-				local chip = CreateObjectNoOffset(model, tables[index].coords.x, tables[index].coords.y, tables[index].coords.z, false, false, false)
-				
-				table.insert(spawnedObjects, chip)
-				table.insert(chips[index][seat], chip)
+			local chip = CreateObjectNoOffset(model, tables[index].coords.x, tables[index].coords.y, tables[index].coords.z, false, false, false)
 
-				if split == false then
-					SetEntityCoordsNoOffset(chip, GetObjectOffsetFromCoords(tables[index].coords.x, tables[index].coords.y, tables[index].coords.z, tables[index].coords.w, chipOffsets[seat][location].x + chipXOffset, chipOffsets[seat][location].y + chipYOffset, chipHeights[1] + chipGap))
-					SetEntityRotation(chip, 0.0, 0.0, tables[index].coords.w + chipRotationOffsets[seat][2].z)
-				else
-					SetEntityCoordsNoOffset(chip, GetObjectOffsetFromCoords(tables[index].coords.x, tables[index].coords.y, tables[index].coords.z, tables[index].coords.w, chipSplitOffsets[seat][2].x + chipXOffset, chipSplitOffsets[seat][2].y + chipYOffset, chipHeights[1] + chipGap))
-					SetEntityRotation(chip, 0.0, 0.0, tables[index].coords.w + chipSplitRotationOffsets[seat][1].z)
-				end
+			table.insert(spawnedObjects, chip)
+			table.insert(chips[index][seat], chip)
 
-				chipGap = chipGap + ((chipThickness[model] ~= nil) and chipThickness[model] or 0.0)
+			if split == false then
+				SetEntityCoordsNoOffset(chip, GetObjectOffsetFromCoords(tables[index].coords.x, tables[index].coords.y, tables[index].coords.z, tables[index].coords.w, pileOffsets[seat][location].x, pileOffsets[seat][location].y, chipHeights[1]))
+				SetEntityRotation(chip, 0.0, 0.0, tables[index].coords.w + pileRotationOffsets[seat][3 - location].z)
+			else
+				SetEntityCoordsNoOffset(chip, GetObjectOffsetFromCoords(tables[index].coords.x, tables[index].coords.y, tables[index].coords.z, tables[index].coords.w, pileOffsets[seat][2].x, pileOffsets[seat][2].y, chipHeights[1]))
+				SetEntityRotation(chip, 0.0, 0.0, tables[index].coords.w + pileRotationOffsets[seat][3 - location].z)
 			end
 
-			-- Hacky way to setup each seats split chips
-			if seat == 1 then
-				if split == false then
-					chipXOffset = chipXOffset - 0.03
-					chipYOffset = chipYOffset - 0.05
-				else
-					chipXOffset = chipXOffset + 0.03
-					chipYOffset = chipYOffset + 0.05				
+			--Get chip offsets
+			--selectedChip = chip
+			--selectedTable = index
+		else
+			local chipXOffset = 0.0
+			local chipYOffset = 0.0
+			
+			for i = 1, #props do
+				local chipGap = 0.0
+
+				for j = 1, #props[i] do
+					local model = GetHashKey(props[i][j])
+					
+					DebugPrint(bet)
+					DebugPrint(seat)
+					DebugPrint(tostring(props[i][j]))
+					DebugPrint(tostring(chipOffsets[seat]))
+				
+					RequestModel(model)
+					repeat Wait(0) until HasModelLoaded(model)
+				
+					local location = 1
+					if double == true then location = 2 end
+					
+					local chip = CreateObjectNoOffset(model, tables[index].coords.x, tables[index].coords.y, tables[index].coords.z, false, false, false)
+					
+					table.insert(spawnedObjects, chip)
+					table.insert(chips[index][seat], chip)
+
+					if split == false then
+						SetEntityCoordsNoOffset(chip, GetObjectOffsetFromCoords(tables[index].coords.x, tables[index].coords.y, tables[index].coords.z, tables[index].coords.w, chipOffsets[seat][location].x + chipXOffset, chipOffsets[seat][location].y + chipYOffset, chipHeights[1] + chipGap))
+						SetEntityRotation(chip, 0.0, 0.0, tables[index].coords.w + chipRotationOffsets[seat][2].z)
+					else
+						SetEntityCoordsNoOffset(chip, GetObjectOffsetFromCoords(tables[index].coords.x, tables[index].coords.y, tables[index].coords.z, tables[index].coords.w, chipSplitOffsets[seat][2].x + chipXOffset, chipSplitOffsets[seat][2].y + chipYOffset, chipHeights[1] + chipGap))
+						SetEntityRotation(chip, 0.0, 0.0, tables[index].coords.w + chipSplitRotationOffsets[seat][1].z)
+					end
+
+					chipGap = chipGap + ((chipThickness[model] ~= nil) and chipThickness[model] or 0.0)
 				end
-			elseif seat == 2 then
-				if split == false then
-					chipXOffset = chipXOffset - 0.05
-					chipYOffset = chipYOffset - 0.02
-				else
-					chipXOffset = chipXOffset + 0.05
-					chipYOffset = chipYOffset + 0.02						
-				end
-			elseif seat == 3 then
-				if split == false then
-					chipXOffset = chipXOffset - 0.05
-					chipYOffset = chipYOffset + 0.02
-				else
-					chipXOffset = chipXOffset + 0.05
-					chipYOffset = chipYOffset - 0.02						
-				end
-			elseif seat == 4 then
-				if split == false then
-					chipXOffset = chipXOffset - 0.02
-					chipYOffset = chipYOffset + 0.05
-				else
-					chipXOffset = chipXOffset + 0.02
-					chipYOffset = chipYOffset - 0.05
+
+				-- Hacky way to setup each seats split chips
+				if seat == 1 then
+					if split == false then
+						chipXOffset = chipXOffset - 0.03
+						chipYOffset = chipYOffset - 0.05
+					else
+						chipXOffset = chipXOffset + 0.03
+						chipYOffset = chipYOffset + 0.05				
+					end
+				elseif seat == 2 then
+					if split == false then
+						chipXOffset = chipXOffset - 0.05
+						chipYOffset = chipYOffset - 0.02
+					else
+						chipXOffset = chipXOffset + 0.05
+						chipYOffset = chipYOffset + 0.02						
+					end
+				elseif seat == 3 then
+					if split == false then
+						chipXOffset = chipXOffset - 0.05
+						chipYOffset = chipYOffset + 0.02
+					else
+						chipXOffset = chipXOffset + 0.05
+						chipYOffset = chipYOffset - 0.02						
+					end
+				elseif seat == 4 then
+					if split == false then
+						chipXOffset = chipXOffset - 0.02
+						chipYOffset = chipYOffset + 0.05
+					else
+						chipXOffset = chipXOffset + 0.02
+						chipYOffset = chipYOffset - 0.05
+					end
 				end
 			end
 		end
