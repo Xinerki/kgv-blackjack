@@ -510,7 +510,6 @@ AddEventHandler("BLACKJACK:PlaceBetChip", function(index, seat, bet, double, spl
 		if chipPile then
 			local model = GetHashKey(props)
 			
-			for j = 1, #props[i] do
 			DebugPrint(bet)
 			DebugPrint(seat)
 			DebugPrint(tostring(props))
@@ -518,7 +517,7 @@ AddEventHandler("BLACKJACK:PlaceBetChip", function(index, seat, bet, double, spl
 		
 			RequestModel(model)
 			repeat Wait(0) until HasModelLoaded(model)
-			
+			local location = 1
 			if double == true then location = 2 end
 			
 			local chip = CreateObjectNoOffset(model, tables[index].coords.x, tables[index].coords.y, tables[index].coords.z, false, false, false)
