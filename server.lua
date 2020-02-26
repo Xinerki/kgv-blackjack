@@ -79,9 +79,27 @@ players = {
 	-- [4] = {},
 }
 
-hackyTracker = {
+tableTracker = {
 	-- ["2"] = 1,
 }
+
+--[===[
+	exports["kgv-blackjack"]:SetGetChipsCallback(function(source)
+		return 0 -- [[ return money ]]
+	end)
+
+	exports["kgv-blackjack"]:SetTakeChipsCallback(function(source, amount)
+		--[[ money = money - amount? ]]
+	end)
+
+	exports["kgv-blackjack"]:SetGiveChipsCallback(function(source, amount)
+		--[[ money = money + amount? ]]
+	end)
+--]===]
+
+getChipsCallback = nil
+takeChipsCallback = nil
+giveChipsCallback = nil
 
 function FindPlayerIdx(tbl, src)
 
@@ -94,13 +112,29 @@ function FindPlayerIdx(tbl, src)
 	return nil
 end
 
+function SetGetChipsCallback(cb)
+	getChipsCallback = cb
+end
+
+function SetTakeChipsCallback(cb)
+	takeChipsCallback = cb
+end
+
+function SetGiveChipsCallback(cb)
+	giveChipsCallback = cb
+end
+
 function GiveMoney(player, money)
-	TriggerEvent("kgv:money:sv_giveMoney", player, math.floor(tonumber(money)))
+	if giveChipsCallback ~= nil then
+		giveChipsCallback(player, money)
+	end
 	-- DebugPrint("MONEY: GIVE "..GetPlayerName(player):upper().." "..money)
 end
 
 function TakeMoney(player, money)
-	TriggerEvent("kgv:money:sv_takeMoney", player, math.floor(tonumber(money)))
+	if takeChipsCallback ~= nil then
+		takeChipsCallback(player, money)
+	end
 	-- DebugPrint("MONEY: TAKE "..GetPlayerName(player):upper().." "..money)
 end
 
@@ -152,6 +186,29 @@ end
 
 RegisterServerEvent("BLACKJACK:SetPlayerBet")
 AddEventHandler('BLACKJACK:SetPlayerBet', SetPlayerBet)
+
+function CheckPlayerBet(i, bet)
+	DebugPrint("TABLE "..i..": CHECKING "..GetPlayerName(source):upper().."'s CHIPS")
+
+	local playerChips = 0 -- Get money
+
+	if getChipsCallback ~= nil then
+		playerChips = getChipsCallback(source)
+	end
+
+	local canBet = false
+
+	if playerChips ~= nil then
+		if playerChips >= bet then
+			canBet = true
+		end
+	end
+
+	TriggerClientEvent("BLACKJACK:BetReceived", source, canBet)
+end
+
+RegisterServerEvent("BLACKJACK:CheckPlayerBet")
+AddEventHandler("BLACKJACK:CheckPlayerBet", CheckPlayerBet)
 
 RegisterServerEvent("BLACKJACK:ReceivedMove")
 
@@ -271,7 +328,7 @@ function StartTableThread(i)
 										receivedMove = true
 									end)
 
-									while receivedMove == false and hackyTracker[tostring(v.player)] ~= nil do
+									while receivedMove == false and tableTracker[tostring(v.player)] ~= nil do
 										Citizen.Wait(0)
 									end
 									--repeat Wait(0) until receivedMove == true
@@ -560,7 +617,7 @@ function StartTableThread(i)
 						while j <= #currentPlayers do
 							local player = currentPlayers[j]
 
-							if hackyTracker[tostring(player.player)] == nil then
+							if tableTracker[tostring(player.player)] == nil then
 								DebugPrint("TABLE "..index..": "..player.player.." WAS REMOVED FROM PLAYERS LIST FOR LEAVING")
 								table.remove(currentPlayers, j)
 							else
@@ -696,7 +753,7 @@ function PlayerSatDown(i, seat)
 	-- chair = seat
 	
 	table.insert(players[i], {player = source, seat = seat, hand = {}, player_in = true, bet = 0})
-	hackyTracker[tostring(source)] = i
+	tableTracker[tostring(source)] = i
 	
 	-- PlayDealerSpeech(i, "MINIGAME_DEALER_GREET")
 	
@@ -746,7 +803,7 @@ RegisterServerEvent("BLACKJACK:PlayerSatUp")
 AddEventHandler('BLACKJACK:PlayerSatUp', PlayerSatUp)
 
 function PlayerLeft()
-	local playerTbl = hackyTracker[tostring(source)]
+	local playerTbl = tableTracker[tostring(source)]
 
 	if playerTbl ~= nil then
 		DebugPrint(GetPlayerName(source):upper() .. " LEFT SERVER")
@@ -758,8 +815,12 @@ function PlayerLeft()
 			table.remove(players[playerTbl], num)
 		end
 
-		hackyTracker[tostring(source)] = nil
+		tableTracker[tostring(source)] = nil
 	end
 end
 
 AddEventHandler("playerDropped", PlayerLeft)
+
+exports("SetGetChipsCallback", SetGetChipsCallback)
+exports("SetTakeChipsCallback", SetTakeChipsCallback)
+exports("SetGiveChipsCallback", SetGiveChipsCallback)
