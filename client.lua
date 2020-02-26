@@ -1,5 +1,28 @@
 seatSideAngle = 30
 
+satDownCallback = nil
+standUpCallback = nil
+
+--[===[
+	exports["kgv-blackjack"]:SetSatDownCallback(function()
+		-- Disable hud components?
+		-- etc
+	end)
+
+	exports["kgv-blackjack"]:SetStandUpCallback(function()
+		-- Enable hud components?
+		-- etc
+	end)
+--]===]
+
+function SetSatDownCallback(cb)
+	satDownCallback = cb
+end
+
+function SetStandUpCallback(cb)
+	standUpCallback = cb
+end
+
 function DisplayHelpText(helpText, time)
 	BeginTextCommandDisplayHelp("STRING")
 	AddTextComponentSubstringWebsite(helpText)
@@ -1163,6 +1186,10 @@ function ProcessTables()
 						end
 						
 						if IsControlJustPressed(1, 51) then
+							if satDownCallback ~= nil then
+								satDownCallback()
+							end
+
 							local initPos = GetAnimInitialOffsetPosition("anim_casino_b@amb@casino@games@shared@player@", seatAnim, coords, rot, 0.01, 2)
 							local initRot = GetAnimInitialOffsetRotation("anim_casino_b@amb@casino@games@shared@player@", seatAnim, coords, rot, 0.01, 2)
 							
@@ -1216,6 +1243,10 @@ function ProcessTables()
 								-- DisplayHelpText("Press ~INPUT_CONTEXT~ to leave Blackjack.")
 								-- if IsControlJustPressed(1, 51) then
 								if leavingBlackjack == true then
+									if standUpCallback ~= nil then
+										standUpCallback()
+									end
+
 									local scene = NetworkCreateSynchronisedScene(coords, rot, 2, false, false, 1065353216, 0, 1065353216)
 									NetworkAddPedToSynchronisedScene(PlayerPedId(), scene, "anim_casino_b@amb@casino@games@shared@player@", "sit_exit_left", 2.0, -2.0, 13, 16, 1148846080, 0)
 									NetworkStartSynchronisedScene(scene)
@@ -1236,3 +1267,6 @@ function ProcessTables()
 end
 
 Citizen.CreateThread(ProcessTables)
+
+exports("SetSatDownCallback", SetSatDownCallback)
+exports("SetStandUpCallback", SetStandUpCallback)
