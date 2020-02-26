@@ -570,23 +570,28 @@ AddEventHandler("BLACKJACK:RequestBets", function(index)
 			BeginScaleformMovieMethod(scaleform, "DRAW_INSTRUCTIONAL_BUTTONS")
 			EndScaleformMovieMethod()
 			
-			local tableType = (tables[scrollerIndex].highStakes == true) and 2 or 1
+			local tableLimit = (tables[scrollerIndex].highStakes == true) and #bettingNums or lowTableLimit
 
 			if IsControlJustPressed(1, 192) then
-				selectedBet = #bettingNums[tableType]
+				selectedBet = tableLimit
 			elseif IsControlJustPressed(1, 175) then -- RIGHT
 				selectedBet = selectedBet + 1
-				if selectedBet > #bettingNums[tableType] then selectedBet = 1 end
+				if selectedBet > tableLimit then selectedBet = 1 end
 			elseif IsControlJustPressed(1, 174) then -- LEFT
 				selectedBet = selectedBet - 1
-				if selectedBet < 1 then selectedBet = #bettingNums[tableType] end
+				if selectedBet < 1 then selectedBet = tableLimit end
 			elseif IsControlJustPressed(1, 51) then
 				leavingBlackjack = true
 				renderScaleform = false
+				selectedBet = 1
 				return
 			end
 			
-			bet = bettingNums[tableType][selectedBet] or 10000
+			bet = bettingNums[selectedBet] or 10000
+			
+			if tables[scrollerIndex].highStakes == true then
+				bet = bet * 10
+			end
 			
 			DisplayHelpText("CURRENT BET:\n"..bet, -1)
 		
