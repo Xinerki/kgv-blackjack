@@ -562,7 +562,7 @@ chipThickness = {
 	[`vw_prop_plaq_10kdollar_st`] = 0.060749001801014,
 }
 
-chipHeights = {
+chipHeights = { -- whatever the fuck this even means
 	0.95,
 	0.896,
 	0.901,
