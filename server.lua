@@ -794,7 +794,8 @@ function PlayerSatUp(i)
 		DebugPrint(GetPlayerName(source):upper() .. " SUCCESSFULLY REMOVED FROM TABLE "..i)
 		
 		table.remove(players[i], num)
-	
+		tableTracker[tostring(source)] = nil
+
 		PlayDealerSpeech(i, "MINIGAME_DEALER_LEAVE_NEUTRAL_GAME")
 	end
 end
@@ -820,6 +821,32 @@ function PlayerLeft()
 end
 
 AddEventHandler("playerDropped", PlayerLeft)
+
+function PlayerRemove(i)
+	DebugPrint(GetPlayerName(source):upper() .. " LEFT TABLE "..i)
+
+	local num = FindPlayerIdx(players[i], source)
+
+	if num ~= nil then
+		DebugPrint(GetPlayerName(source):upper() .. " SUCCESSFULLY REMOVED FROM TABLE "..i)
+		
+		local playerInfo = players[i][num]
+		
+		if playerInfo.player_in then
+			if playerInfo.bet > 0 then
+				GiveMoney(source, playerInfo.bet) -- give money back as player was removed before losing or winning?
+			end
+		end
+
+		table.remove(players[i], num)
+		tableTracker[tostring(source)] = nil
+		
+		PlayDealerSpeech(i, "MINIGAME_DEALER_LEAVE_NEUTRAL_GAME")
+	end
+end
+
+RegisterServerEvent("BLACKJACK:PlayerRemove")
+AddEventHandler('BLACKJACK:PlayerRemove', PlayerRemove)
 
 exports("SetGetChipsCallback", SetGetChipsCallback)
 exports("SetTakeChipsCallback", SetTakeChipsCallback)

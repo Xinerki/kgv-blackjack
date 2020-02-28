@@ -2,6 +2,7 @@ seatSideAngle = 30
 
 satDownCallback = nil
 standUpCallback = nil
+leaveCheckCallback = nil
 
 --[===[
 	exports["kgv-blackjack"]:SetSatDownCallback(function()
@@ -13,6 +14,14 @@ standUpCallback = nil
 		-- Enable hud components?
 		-- etc
 	end)
+
+	exports["kgv-blackjack"]:SetLeaveCheckCallback(function()
+		-- if isCuffed or isBeingCarried or isInJail??? then
+		-- return true
+		-- else
+		-- return false
+		-- end
+	end)
 --]===]
 
 function SetSatDownCallback(cb)
@@ -21,6 +30,10 @@ end
 
 function SetStandUpCallback(cb)
 	standUpCallback = cb
+end
+
+function SetLeaveCheckCallback(cb)
+	leaveCheckCallback = cb
 end
 
 function DisplayHelpText(helpText, time)
@@ -142,6 +155,12 @@ function getChips(amount)
 	else
 		return true, "vw_prop_vw_chips_pile_02a"
 	end
+end
+
+function leaveBlackjack()
+	leavingBlackjack = true
+	renderScaleform = false
+	selectedBet = 1
 end
 
 RegisterCommand("bet", function(source, args, rawCommand)
@@ -640,6 +659,8 @@ RegisterNetEvent("BLACKJACK:BetReceived")
 
 RegisterNetEvent("BLACKJACK:RequestBets")
 AddEventHandler("BLACKJACK:RequestBets", function(index)
+	if leavingBlackjack == true then leaveBlackjack() return end
+
 	Citizen.CreateThread(function()
 		scrollerIndex = index
 		renderScaleform = true
@@ -720,8 +741,10 @@ AddEventHandler("BLACKJACK:RequestBets", function(index)
 				if canBet then
 					renderScaleform = false
 					if selectedBet < 27 then
+						if leavingBlackjack == true then leaveBlackjack() return end
+
 						local anim = "place_bet_small"
-					
+						
 						playerBusy = true
 						local scene = NetworkCreateSynchronisedScene(g_coords, g_rot, 2, true, false, 1065353216, 0, 1065353216)
 						NetworkAddPedToSynchronisedScene(PlayerPedId(), scene, "anim_casino_b@amb@casino@games@blackjack@player", anim, 2.0, -2.0, 13, 16, 1148846080, 0)
@@ -729,22 +752,28 @@ AddEventHandler("BLACKJACK:RequestBets", function(index)
 						
 						Wait(math.floor(GetAnimDuration("anim_casino_b@amb@casino@games@blackjack@player", anim)*500))
 						
+						if leavingBlackjack == true then leaveBlackjack() return end
+
 						TriggerServerEvent("BLACKJACK:SetPlayerBet", g_seat, closestChair, bet, selectedBet, false)
 
 						Wait(math.floor(GetAnimDuration("anim_casino_b@amb@casino@games@blackjack@player", anim)*500))
 						
+						if leavingBlackjack == true then leaveBlackjack() return end
+
 						playerBusy = false
 						
 						local idleVar = "idle_var_0"..math.random(1,5)
 						
 						DebugPrint("IDLING POST-BUSY: "..idleVar)
-
+						
 						local scene = NetworkCreateSynchronisedScene(g_coords, g_rot, 2, true, true, 1065353216, 0, 1065353216)
 						NetworkAddPedToSynchronisedScene(PlayerPedId(), scene, "anim_casino_b@amb@casino@games@shared@player@", idleVar, 2.0, -2.0, 13, 16, 1148846080, 0)
 						NetworkStartSynchronisedScene(scene)
 					else
+						if leavingBlackjack == true then leaveBlackjack() return end
+
 						local anim = "place_bet_large"
-					
+						
 						playerBusy = true
 						local scene = NetworkCreateSynchronisedScene(g_coords, g_rot, 2, true, false, 1065353216, 0, 1065353216)
 						NetworkAddPedToSynchronisedScene(PlayerPedId(), scene, "anim_casino_b@amb@casino@games@blackjack@player", anim, 2.0, -2.0, 13, 16, 1148846080, 0)
@@ -752,9 +781,13 @@ AddEventHandler("BLACKJACK:RequestBets", function(index)
 						
 						Wait(math.floor(GetAnimDuration("anim_casino_b@amb@casino@games@blackjack@player", anim)*500))
 						
+						if leavingBlackjack == true then leaveBlackjack() return end
+
 						TriggerServerEvent("BLACKJACK:SetPlayerBet", g_seat, closestChair, bet, selectedBet, false)
 
 						Wait(math.floor(GetAnimDuration("anim_casino_b@amb@casino@games@blackjack@player", anim)*500))
+
+						if leavingBlackjack == true then leaveBlackjack() return end
 						
 						playerBusy = false
 						
@@ -779,6 +812,8 @@ end)
 RegisterNetEvent("BLACKJACK:RequestMove")
 AddEventHandler("BLACKJACK:RequestMove", function()
 	Citizen.CreateThread(function()
+		if leavingBlackjack == true then leaveBlackjack() return end
+		
 		renderScaleform = true
 		while true do Wait(0)
 		
@@ -832,6 +867,8 @@ AddEventHandler("BLACKJACK:RequestMove", function()
 			EndScaleformMovieMethod()
 		
 			if IsControlJustPressed(1, 201) then
+				if leavingBlackjack == true then print("returning") return end
+				
 				TriggerServerEvent("BLACKJACK:ReceivedMove", "hit")
 				
 				renderScaleform = false
@@ -843,8 +880,11 @@ AddEventHandler("BLACKJACK:RequestMove", function()
 				NetworkAddPedToSynchronisedScene(PlayerPedId(), scene, "anim_casino_b@amb@casino@games@blackjack@player", anim, 2.0, -2.0, 13, 16, 1148846080, 0)
 				NetworkStartSynchronisedScene(scene)
 				Wait(math.floor(GetAnimDuration("anim_casino_b@amb@casino@games@blackjack@player", anim)*990))
+
+				if leavingBlackjack == true then leaveBlackjack() return end
+
 				playerBusy = false
-				
+			
 				local idleVar = "idle_var_0"..math.random(1,5)
 				
 				DebugPrint("IDLING POST-BUSY: "..idleVar)
@@ -856,6 +896,8 @@ AddEventHandler("BLACKJACK:RequestMove", function()
 				return
 			end
 			if IsControlJustPressed(1, 203) then
+				if leavingBlackjack == true then leaveBlackjack() return end
+
 				TriggerServerEvent("BLACKJACK:ReceivedMove", "stand")
 				
 				renderScaleform = false
@@ -867,6 +909,9 @@ AddEventHandler("BLACKJACK:RequestMove", function()
 				NetworkAddPedToSynchronisedScene(PlayerPedId(), scene, "anim_casino_b@amb@casino@games@blackjack@player", anim, 2.0, -2.0, 13, 16, 1148846080, 0)
 				NetworkStartSynchronisedScene(scene)
 				Wait(math.floor(GetAnimDuration("anim_casino_b@amb@casino@games@blackjack@player", anim)*990))
+
+				if leavingBlackjack == true then leaveBlackjack() return end
+
 				playerBusy = false
 				
 				local idleVar = "idle_var_0"..math.random(1,5)
@@ -880,6 +925,8 @@ AddEventHandler("BLACKJACK:RequestMove", function()
 				return
 			end
 			if IsControlJustPressed(1, 192) and #hand == 2 then
+				if leavingBlackjack == true then leaveBlackjack() return end
+
 				TriggerServerEvent("BLACKJACK:CheckPlayerBet", g_seat, bet)
 
 				local betCheckRecieved = false
@@ -894,6 +941,8 @@ AddEventHandler("BLACKJACK:RequestMove", function()
 				RemoveEventHandler(eventHandler)
 				
 				if canBet then
+					if leavingBlackjack == true then leaveBlackjack() return end
+
 					TriggerServerEvent("BLACKJACK:ReceivedMove", "double")
 					
 					renderScaleform = false
@@ -906,9 +955,14 @@ AddEventHandler("BLACKJACK:RequestMove", function()
 					NetworkStartSynchronisedScene(scene)
 					Wait(math.floor(GetAnimDuration("anim_casino_b@amb@casino@games@blackjack@player", anim)*500))
 					
+					if leavingBlackjack == true then leaveBlackjack() return end
+
 					TriggerServerEvent("BLACKJACK:SetPlayerBet", g_seat, closestChair, bet, selectedBet, true)
 					
 					Wait(math.floor(GetAnimDuration("anim_casino_b@amb@casino@games@blackjack@player", anim)*500))
+
+					if leavingBlackjack == true then leaveBlackjack() return end
+
 					playerBusy = false
 					
 					local idleVar = "idle_var_0"..math.random(1,5)
@@ -925,6 +979,8 @@ AddEventHandler("BLACKJACK:RequestMove", function()
 				end
 			end
 			if IsControlJustPressed(1, 209) and CanSplitHand(hand) == true then
+				if leavingBlackjack == true then leaveBlackjack() return end
+
 				TriggerServerEvent("BLACKJACK:CheckPlayerBet", g_seat, bet)
 
 				local betCheckRecieved = false
@@ -939,6 +995,8 @@ AddEventHandler("BLACKJACK:RequestMove", function()
 				RemoveEventHandler(eventHandler)
 				
 				if canBet then
+					if leavingBlackjack == true then leaveBlackjack() return end
+
 					TriggerServerEvent("BLACKJACK:ReceivedMove", "split")
 					
 					renderScaleform = false
@@ -955,9 +1013,14 @@ AddEventHandler("BLACKJACK:RequestMove", function()
 					NetworkStartSynchronisedScene(scene)
 					Wait(math.floor(GetAnimDuration("anim_casino_b@amb@casino@games@blackjack@player", anim)*500))
 					
+					if leavingBlackjack == true then leaveBlackjack() return end
+
 					TriggerServerEvent("BLACKJACK:SetPlayerBet", g_seat, closestChair, bet, selectedBet, false, true)
 					
 					Wait(math.floor(GetAnimDuration("anim_casino_b@amb@casino@games@blackjack@player", anim)*500))
+
+					if leavingBlackjack == true then leaveBlackjack() return end
+
 					playerBusy = false
 					
 					local idleVar = "idle_var_0"..math.random(1,5)
@@ -995,7 +1058,8 @@ AddEventHandler("BLACKJACK:GameEndReaction", function(result)
 		-- for x=1,4 do
 			-- handObjs[i][x] = {}
 		-- end
-	
+		if leavingBlackjack == true then leaveBlackjack() return end
+
 		local anim = "reaction_"..result.."_var_0"..math.random(1,4)
 		
 		DebugPrint("Reacting: "..anim)
@@ -1005,6 +1069,9 @@ AddEventHandler("BLACKJACK:GameEndReaction", function(result)
 		NetworkAddPedToSynchronisedScene(PlayerPedId(), scene, "anim_casino_b@amb@casino@games@shared@player@", anim, 2.0, -2.0, 13, 16, 1148846080, 0)
 		NetworkStartSynchronisedScene(scene)
 		Wait(math.floor(GetAnimDuration("anim_casino_b@amb@casino@games@shared@player@", anim)*990))
+
+		if leavingBlackjack == true then leaveBlackjack() return end
+
 		playerBusy = false
 		
 		idleVar = "idle_var_0"..math.random(1,5)
@@ -1229,16 +1296,36 @@ function ProcessTables()
 								Wait(0)
 								if GetGameTimer() >= endTime then
 									if playerBusy == true then
-										repeat Wait(0) until playerBusy == false
-									end
-								
-									idleVar = "idle_var_0"..math.random(1,5)
+										while playerBusy == true do
+											Wait(0)
 
-									local scene = NetworkCreateSynchronisedScene(coords, rot, 2, true, true, 1065353216, 0, 1065353216)
-									NetworkAddPedToSynchronisedScene(PlayerPedId(), scene, "anim_casino_b@amb@casino@games@shared@player@", idleVar, 2.0, -2.0, 13, 16, 1148846080, 0)
-									NetworkStartSynchronisedScene(scene)
-									endTime = GetGameTimer() + math.floor(GetAnimDuration("anim_casino_b@amb@casino@games@shared@player@", idleVar)*990)
-									-- DebugPrint("idling again")
+											local playerPed = PlayerPedId()
+
+											if IsEntityDead(playerPed) then
+												TriggerServerEvent("BLACKJACK:PlayerRemove", i)
+												ClearPedTasks(playerPed)
+												leaveBlackjack()
+												break
+											elseif leaveCheckCallback ~= nil then
+												if leaveCheckCallback() then
+													TriggerServerEvent("BLACKJACK:PlayerRemove", i)
+													ClearPedTasks(playerPed)
+													leaveBlackjack()
+													break									
+												end
+											end
+										end
+									end
+									
+									if leavingBlackjack == false then
+										idleVar = "idle_var_0"..math.random(1,5)
+
+										local scene = NetworkCreateSynchronisedScene(coords, rot, 2, true, true, 1065353216, 0, 1065353216)
+										NetworkAddPedToSynchronisedScene(PlayerPedId(), scene, "anim_casino_b@amb@casino@games@shared@player@", idleVar, 2.0, -2.0, 13, 16, 1148846080, 0)
+										NetworkStartSynchronisedScene(scene)
+										endTime = GetGameTimer() + math.floor(GetAnimDuration("anim_casino_b@amb@casino@games@shared@player@", idleVar)*990)
+										-- DebugPrint("idling again")
+									end
 								end
 								
 								-- DisplayHelpText("Press ~INPUT_CONTEXT~ to leave Blackjack.")
@@ -1255,6 +1342,22 @@ function ProcessTables()
 									Wait(math.floor(GetAnimDuration("anim_casino_b@amb@casino@games@shared@player@", "sit_exit_left")*800))
 									ClearPedTasks(PlayerPedId())
 									break
+								else
+									local playerPed = PlayerPedId()
+
+									if IsEntityDead(playerPed) then
+										TriggerServerEvent("BLACKJACK:PlayerRemove", i)
+										ClearPedTasks(playerPed)
+										leaveBlackjack()
+										break
+									elseif leaveCheckCallback ~= nil then
+										if leaveCheckCallback() then
+											TriggerServerEvent("BLACKJACK:PlayerRemove", i)
+											ClearPedTasks(playerPed)
+											leaveBlackjack()
+											break									
+										end
+									end
 								end
 
 								-- if IsEntityPlayingAnim(PlayerPedId(), "anim_casino_b@amb@casino@games@shared@player@", idleVar, 3) ~= 1 then break end
@@ -1271,3 +1374,4 @@ Citizen.CreateThread(ProcessTables)
 
 exports("SetSatDownCallback", SetSatDownCallback)
 exports("SetStandUpCallback", SetStandUpCallback)
+exports("SetLeaveCheckCallback", SetLeaveCheckCallback)
