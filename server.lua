@@ -302,6 +302,11 @@ function StartTableThread(i)
 						Wait(2000)
 						PlayDealerSpeech(index, "MINIGAME_BJACK_DEALER_BLACKJACK")
 						TriggerClientEvent("BLACKJACK:DealerTurnOverCard", -1, index)
+
+						for i,v in pairs(currentPlayers) do
+							TriggerClientEvent("BLACKJACK:GameEndReaction", v.player, "bad")
+						end
+
 						gameRunning = false
 					elseif cardValue(dealerHand[2]) == 10 or cardValue(dealerHand[2]) == 11 then
 						DebugPrint("TABLE "..index..": DEALER HAS A 10, CHECKING..")
