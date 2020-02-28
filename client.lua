@@ -3,6 +3,7 @@ seatSideAngle = 30
 satDownCallback = nil
 standUpCallback = nil
 leaveCheckCallback = nil
+canSitDownCallback = nil
 
 --[===[
 	exports["kgv-blackjack"]:SetSatDownCallback(function()
@@ -22,6 +23,14 @@ leaveCheckCallback = nil
 		-- return false
 		-- end
 	end)
+
+	exports["kgv-blackjack"]:SetCanSitDownCallback(function()
+		-- if not isCuffed and not isBeingCarried and not isInJail??? then
+		-- return true
+		-- else
+		-- return false
+		-- end
+	end)
 --]===]
 
 function SetSatDownCallback(cb)
@@ -34,6 +43,10 @@ end
 
 function SetLeaveCheckCallback(cb)
 	leaveCheckCallback = cb
+end
+
+function SetCanSitDownCallback(cb)
+	canSitDownCallback = cb
 end
 
 function DisplayHelpText(helpText, time)
@@ -1227,9 +1240,14 @@ function ProcessTables()
 					if angle > 0 then seatAnim = "sit_enter_left" end
 					if angle < 0 then seatAnim = "sit_enter_right" end
 					if angle > seatSideAngle or angle < -seatSideAngle then seatAnim = seatAnim .. "_side" end
-					
-					if GetDistanceBetweenCoords(coords, GetEntityCoords(PlayerPedId()), true) < 1.5 and not IsSeatOccupied(coords, 0.5) then
-						
+
+					local canSit = true
+
+					if canSitDownCallback ~= nil then
+						canSit = canSitDownCallback()
+					end
+
+					if GetDistanceBetweenCoords(coords, GetEntityCoords(PlayerPedId()), true) < 1.5 and not IsSeatOccupied(coords, 0.5) and canSit then
 						if highStakes then
 							DisplayHelpText("Press ~INPUT_CONTEXT~ to play High-Limit Blackjack.")
 						else
@@ -1375,3 +1393,4 @@ Citizen.CreateThread(ProcessTables)
 exports("SetSatDownCallback", SetSatDownCallback)
 exports("SetStandUpCallback", SetStandUpCallback)
 exports("SetLeaveCheckCallback", SetLeaveCheckCallback)
+exports("SetCanSitDownCallback", SetCanSitDownCallback)
