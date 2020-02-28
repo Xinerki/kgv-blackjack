@@ -312,301 +312,334 @@ function StartTableThread(i)
 					if gameRunning == true then
 						for i,v in pairs(currentPlayers) do
 							if v.player_in then
-								PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_intro")
-								Wait(1500)
-								PlayDealerSpeech(index, "MINIGAME_BJACK_DEALER_ANOTHER_CARD")
-								while v.player_in == true and #v.hand < 5 do
-									Wait(0)
-									PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle")
-									DebugPrint("TABLE "..index..": AWAITING MOVE FROM "..GetPlayerName(v.player):upper())
-									TriggerClientEvent("BLACKJACK:RequestMove", v.player)
-									local receivedMove = false
-									local move = "stand"
-									local eventHandler = AddEventHandler("BLACKJACK:ReceivedMove", function(m)
-										if source ~= v.player then return end
-										move = m
-										receivedMove = true
-									end)
+								if tableTracker[tostring(v.player)] == nil then
+									DebugPrint("TABLE "..index..": "..v.player.." WAS PUT OUT DUE TO LEAVING")
+									v.player_in = false
+									TriggerClientEvent("BLACKJACK:RetrieveCards", -1, index, v.seat)
+								else
+									PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_intro")
+									Wait(1500)
+									PlayDealerSpeech(index, "MINIGAME_BJACK_DEALER_ANOTHER_CARD")
+									while v.player_in == true and #v.hand < 5 do
+										Wait(0)
+										PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle")
+										DebugPrint("TABLE "..index..": AWAITING MOVE FROM "..GetPlayerName(v.player):upper())
+										TriggerClientEvent("BLACKJACK:RequestMove", v.player)
+										local receivedMove = false
+										local move = "stand"
+										local eventHandler = AddEventHandler("BLACKJACK:ReceivedMove", function(m)
+											if source ~= v.player then return end
+											move = m
+											receivedMove = true
+										end)
 
-									while receivedMove == false and tableTracker[tostring(v.player)] ~= nil do
-										Citizen.Wait(0)
-									end
-									--repeat Wait(0) until receivedMove == true
-									RemoveEventHandler(eventHandler)
-									
-									if not receivedMove then
-										DebugPrint("TABLE "..index..": "..v.player.." WAS PUT OUT DUE TO LEAVING")
-										v.player_in = false
-										TriggerClientEvent("BLACKJACK:RetrieveCards", -1, index, v.seat)
-									else
-										if move == "hit" then
-											local card = takeCard(deck)
-											TriggerClientEvent("BLACKJACK:GiveCard", -1, index, v.seat, #v.hand+1, card)
-											-- PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_outro")
-											-- Wait(1500)
-											PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_hit_card_player_0" .. 5-v.seat)
-											table.insert(v.hand, card)
-											Wait(1500)
-											DebugPrint("TABLE "..index..": DEALT "..GetPlayerName(v.player):upper().." "..card)
-											
-											if handValue(v.hand) == 21 then
-												-- PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_outro")
-												-- Wait(1500)
-												DebugPrint("TABLE "..index..": "..GetPlayerName(v.player):upper().." HAS 21")
-												-- v.player_in = false
-												PlayDealerSpeech(index, "MINIGAME_BJACK_DEALER_"..handValue(v.hand))
-												break
-											elseif handValue(v.hand) > 21 then
-												-- PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_outro")
-												-- Wait(1500)
-												TriggerClientEvent("BLACKJACK:GameEndReaction", v.player, "bad")
-												DebugPrint("TABLE "..index..": "..GetPlayerName(v.player):upper().." WENT BUST")
-												v.player_in = false
-												PlayDealerSpeech(index, "MINIGAME_BJACK_DEALER_PLAYER_BUST")
-											else
-												-- Wait(1000)
-												PlayDealerSpeech(index, "MINIGAME_BJACK_DEALER_"..handValue(v.hand))
-											end
-										elseif move == "double" then
-											TakeMoney(v.player, v.bet)
-											v.bet = v.bet*2
-											
-											-- TriggerClientEvent("BLACKJACK:PlaceBetChip", -1, i, 5-v.seat, betId)
-											
-											local card = takeCard(deck)
-											TriggerClientEvent("BLACKJACK:GiveCard", -1, index, v.seat, #v.hand+1, card)
-											-- PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_outro")
-											-- Wait(1500)
-											PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_hit_card_player_0" .. 5-v.seat)
-											table.insert(v.hand, card)
-											Wait(1500)
-											DebugPrint("TABLE "..index..": DEALT "..GetPlayerName(v.player):upper().." "..card)
-											
-											if handValue(v.hand) == 21 then
-												-- PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_outro")
-												-- Wait(1500)
-												DebugPrint("TABLE "..index..": "..GetPlayerName(v.player):upper().." HAS 21")
-												-- v.player_in = false
-												PlayDealerSpeech(index, "MINIGAME_BJACK_DEALER_"..handValue(v.hand))
-												break
-											elseif handValue(v.hand) > 21 then
-												-- PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_outro")
-												-- Wait(1500)
-												TriggerClientEvent("BLACKJACK:GameEndReaction", v.player, "bad")
-												DebugPrint("TABLE "..index..": "..GetPlayerName(v.player):upper().." WENT BUST")
-												v.player_in = false
-												PlayDealerSpeech(index, "MINIGAME_BJACK_DEALER_PLAYER_BUST")
-											else
-												-- Wait(2000)
-												PlayDealerSpeech(index, "MINIGAME_BJACK_DEALER_"..handValue(v.hand))
-											end
-											
-											break
-										elseif move == "split" then
-											TakeMoney(v.player, v.bet)
-											v.bet = v.bet*2
-											
-											-- TriggerClientEvent("BLACKJACK:PlaceBetChip", -1, i, 5-v.seat, betId)
-											
-											PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_split_card_player_0" .. 5-v.seat)
-											
-											v.splitHand = {}
-											
-											local splitCard = table.remove(v.hand, 2)
-											table.insert(v.splitHand, splitCard)
-											
-											Wait(500)
-											
-											TriggerClientEvent("BLACKJACK:SplitHand", -1, index, v.seat, #v.splitHand)
-											
-											Wait(1000)
-											
-											local card = takeCard(deck)
-											TriggerClientEvent("BLACKJACK:GiveCard", -1, index, v.seat, #v.hand+1, card, false, false)
-											-- PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_outro")
-											-- Wait(1500)
-											PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_hit_card_player_0" .. 5-v.seat)
-											
-											-- female_dealer_focus_player_01_idle_split
-											
-											table.insert(v.hand, card)
-											Wait(1500)
-											DebugPrint("TABLE "..index..": DEALT "..GetPlayerName(v.player):upper().." "..card)
-											
-											if handValue(v.hand) == 21 then
-												-- PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_outro")
-												-- Wait(1500)
-												DebugPrint("TABLE "..index..": "..GetPlayerName(v.player):upper().." HAS 21")
-												-- v.player_in = false
-												PlayDealerSpeech(index, "MINIGAME_BJACK_DEALER_BLACKJACK")
-												break
-											elseif handValue(v.hand) > 21 then
-												-- PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_outro")
-												-- Wait(1500)
-												TriggerClientEvent("BLACKJACK:GameEndReaction", v.player, "bad")
-												DebugPrint("TABLE "..index..": "..GetPlayerName(v.player):upper().." WENT BUST")
-												-- v.player_in = false
-												PlayDealerSpeech(index, "MINIGAME_BJACK_DEALER_PLAYER_BUST")
-											else
-												-- Wait(2000)
-												PlayDealerSpeech(index, "MINIGAME_BJACK_DEALER_"..handValue(v.hand))
-											end
-											
-											local card = takeCard(deck)
-											TriggerClientEvent("BLACKJACK:GiveCard", -1, index, v.seat, #v.splitHand+1, card, false, true)
-											-- PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_outro")
-											-- Wait(1500)
-											PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_hit_second_card_player_0" .. 5-v.seat)
-											
-											table.insert(v.splitHand, card)
-											Wait(1500)
-											DebugPrint("TABLE "..index..": DEALT "..GetPlayerName(v.player):upper().." "..card)
-											
-											if handValue(v.splitHand) == 21 then
-												-- PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_outro")
-												-- Wait(1500)
-												DebugPrint("TABLE "..index..": "..GetPlayerName(v.player):upper().." HAS 21")
-												-- v.player_in = false
-												PlayDealerSpeech(index, "MINIGAME_BJACK_DEALER_"..handValue(v.splitHand))
-												break
-											elseif handValue(v.splitHand) > 21 then
-												-- PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_outro")
-												-- Wait(1500)
-												TriggerClientEvent("BLACKJACK:GameEndReaction", v.player, "bad")
-												DebugPrint("TABLE "..index..": "..GetPlayerName(v.player):upper().." WENT BUST")
-												-- v.player_in = false
-												PlayDealerSpeech(index, "MINIGAME_BJACK_DEALER_PLAYER_BUST")
-											else
-												-- Wait(2000)
-												PlayDealerSpeech(index, "MINIGAME_BJACK_DEALER_"..handValue(v.splitHand))
-											end
+										while receivedMove == false and tableTracker[tostring(v.player)] ~= nil do
+											Citizen.Wait(0)
+										end
+										--repeat Wait(0) until receivedMove == true
+										RemoveEventHandler(eventHandler)
 										
-											-- PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_intro")
-											-- Wait(1500)
-											PlayDealerSpeech(index, "MINIGAME_BJACK_DEALER_ANOTHER_CARD")
-											repeat Wait(0)
-												PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle")
-												DebugPrint("TABLE "..index..": AWAITING MOVE FROM "..GetPlayerName(v.player):upper())
-												TriggerClientEvent("BLACKJACK:RequestMove", v.player)
-												local receivedMove = false
-												local move = "stand"
-												local eventHandler = AddEventHandler("BLACKJACK:ReceivedMove", function(m)
-													if source ~= v.player then return end
-													move = m
-													receivedMove = true
-												end)
-												repeat Wait(0) until receivedMove == true
-												RemoveEventHandler(eventHandler)
+										if not receivedMove then
+											DebugPrint("TABLE "..index..": "..v.player.." WAS PUT OUT DUE TO LEAVING")
+											v.player_in = false
+											TriggerClientEvent("BLACKJACK:RetrieveCards", -1, index, v.seat)
+										else
+											if move == "hit" then
+												local card = takeCard(deck)
+												TriggerClientEvent("BLACKJACK:GiveCard", -1, index, v.seat, #v.hand+1, card)
+												-- PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_outro")
+												-- Wait(1500)
+												PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_hit_card_player_0" .. 5-v.seat)
+												table.insert(v.hand, card)
+												Wait(1500)
+												DebugPrint("TABLE "..index..": DEALT "..GetPlayerName(v.player):upper().." "..card)
 												
-												if move == "hit" then
-													local card = takeCard(deck)
-													TriggerClientEvent("BLACKJACK:GiveCard", -1, index, v.seat, #v.hand+1, card, false, false)
+												if handValue(v.hand) == 21 then
 													-- PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_outro")
 													-- Wait(1500)
-													PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_hit_card_player_0" .. 5-v.seat)
-													table.insert(v.hand, card)
-													Wait(1500)
-													DebugPrint("TABLE "..index..": DEALT "..GetPlayerName(v.player):upper().." "..card)
-													
-													if handValue(v.hand) == 21 then
-														-- PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_outro")
-														-- Wait(1500)
-														DebugPrint("TABLE "..index..": "..GetPlayerName(v.player):upper().." HAS 21")
-														-- v.player_in = false
-														PlayDealerSpeech(index, "MINIGAME_BJACK_DEALER_"..handValue(v.hand))
-														break
-													elseif handValue(v.hand) > 21 then
-														-- PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_outro")
-														-- Wait(1500)
-														TriggerClientEvent("BLACKJACK:GameEndReaction", v.player, "bad")
-														DebugPrint("TABLE "..index..": "..GetPlayerName(v.player):upper().." WENT BUST")
-														-- v.player_in = false
-														PlayDealerSpeech(index, "MINIGAME_BJACK_DEALER_PLAYER_BUST")
-													else
-														-- Wait(1000)
-														PlayDealerSpeech(index, "MINIGAME_BJACK_DEALER_"..handValue(v.hand))
-													end
-												elseif move == "stand" then
-													-- PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_outro_split")
-													-- Wait(1500)
+													DebugPrint("TABLE "..index..": "..GetPlayerName(v.player):upper().." HAS 21")
+													-- v.player_in = false
+													PlayDealerSpeech(index, "MINIGAME_BJACK_DEALER_"..handValue(v.hand))
 													break
-												end
-											until handValue(v.hand) >= 21 or #v.hand == 5
-											
-											PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_outro")
-											Wait(1500)
-											
-											PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_intro_split")
-											Wait(1500)
-											PlayDealerSpeech(index, "MINIGAME_BJACK_DEALER_ANOTHER_CARD")
-											
-											repeat Wait(0)
-												PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_split")
-												DebugPrint("TABLE "..index..": AWAITING MOVE FROM "..GetPlayerName(v.player):upper())
-												TriggerClientEvent("BLACKJACK:RequestMove", v.player)
-												local receivedMove = false
-												local move = "stand"
-												local eventHandler = AddEventHandler("BLACKJACK:ReceivedMove", function(m)
-													if source ~= v.player then return end
-													move = m
-													receivedMove = true
-												end)
-												repeat Wait(0) until receivedMove == true
-												RemoveEventHandler(eventHandler)
-												
-												if move == "hit" then
-													local card = takeCard(deck)
-													TriggerClientEvent("BLACKJACK:GiveCard", -1, index, v.seat, #v.splitHand+1, card, false, true)
+												elseif handValue(v.hand) > 21 then
 													-- PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_outro")
 													-- Wait(1500)
-													PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_hit_second_card_player_0" .. 5-v.seat)
-													table.insert(v.splitHand, card)
-													Wait(1500)
-													DebugPrint("TABLE "..index..": DEALT "..GetPlayerName(v.player):upper().." "..card)
-													
-													if handValue(v.splitHand) == 21 then
-														-- PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_outro")
-														-- Wait(1500)
-														DebugPrint("TABLE "..index..": "..GetPlayerName(v.player):upper().." HAS 21")
-														-- v.player_in = false
-														PlayDealerSpeech(index, "MINIGAME_BJACK_DEALER_"..handValue(v.splitHand))
-														break
-													elseif handValue(v.splitHand) > 21 then
-														-- PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_outro")
-														-- Wait(1500)
-														TriggerClientEvent("BLACKJACK:GameEndReaction", v.player, "bad")
-														DebugPrint("TABLE "..index..": "..GetPlayerName(v.player):upper().." WENT BUST")
-														-- v.player_in = false
-														PlayDealerSpeech(index, "MINIGAME_BJACK_DEALER_PLAYER_BUST")
-													else
-														-- Wait(1000)
-														PlayDealerSpeech(index, "MINIGAME_BJACK_DEALER_"..handValue(v.splitHand))
-													end
-												elseif move == "stand" then
-													break
+													TriggerClientEvent("BLACKJACK:GameEndReaction", v.player, "bad")
+													DebugPrint("TABLE "..index..": "..GetPlayerName(v.player):upper().." WENT BUST")
+													v.player_in = false
+													PlayDealerSpeech(index, "MINIGAME_BJACK_DEALER_PLAYER_BUST")
+												else
+													-- Wait(1000)
+													PlayDealerSpeech(index, "MINIGAME_BJACK_DEALER_"..handValue(v.hand))
 												end
-											until handValue(v.splitHand) >= 21 or #v.splitHand == 5
+											elseif move == "double" then
+												TakeMoney(v.player, v.bet)
+												v.bet = v.bet*2
+												
+												-- TriggerClientEvent("BLACKJACK:PlaceBetChip", -1, i, 5-v.seat, betId)
+												
+												local card = takeCard(deck)
+												TriggerClientEvent("BLACKJACK:GiveCard", -1, index, v.seat, #v.hand+1, card)
+												-- PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_outro")
+												-- Wait(1500)
+												PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_hit_card_player_0" .. 5-v.seat)
+												table.insert(v.hand, card)
+												Wait(1500)
+												DebugPrint("TABLE "..index..": DEALT "..GetPlayerName(v.player):upper().." "..card)
+												
+												if handValue(v.hand) == 21 then
+													-- PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_outro")
+													-- Wait(1500)
+													DebugPrint("TABLE "..index..": "..GetPlayerName(v.player):upper().." HAS 21")
+													-- v.player_in = false
+													PlayDealerSpeech(index, "MINIGAME_BJACK_DEALER_"..handValue(v.hand))
+													break
+												elseif handValue(v.hand) > 21 then
+													-- PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_outro")
+													-- Wait(1500)
+													TriggerClientEvent("BLACKJACK:GameEndReaction", v.player, "bad")
+													DebugPrint("TABLE "..index..": "..GetPlayerName(v.player):upper().." WENT BUST")
+													v.player_in = false
+													PlayDealerSpeech(index, "MINIGAME_BJACK_DEALER_PLAYER_BUST")
+												else
+													-- Wait(2000)
+													PlayDealerSpeech(index, "MINIGAME_BJACK_DEALER_"..handValue(v.hand))
+												end
+												
+												break
+											elseif move == "split" then
+												TakeMoney(v.player, v.bet)
+												v.bet = v.bet*2
+												
+												-- TriggerClientEvent("BLACKJACK:PlaceBetChip", -1, i, 5-v.seat, betId)
+												
+												PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_split_card_player_0" .. 5-v.seat)
+												
+												v.splitHand = {}
+												
+												local splitCard = table.remove(v.hand, 2)
+												table.insert(v.splitHand, splitCard)
+												
+												Wait(500)
+												
+												TriggerClientEvent("BLACKJACK:SplitHand", -1, index, v.seat, #v.splitHand)
+												
+												Wait(1000)
+												
+												local card = takeCard(deck)
+												TriggerClientEvent("BLACKJACK:GiveCard", -1, index, v.seat, #v.hand+1, card, false, false)
+												-- PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_outro")
+												-- Wait(1500)
+												PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_hit_card_player_0" .. 5-v.seat)
+												
+												-- female_dealer_focus_player_01_idle_split
+												
+												table.insert(v.hand, card)
+												Wait(1500)
+												DebugPrint("TABLE "..index..": DEALT "..GetPlayerName(v.player):upper().." "..card)
+												
+												if handValue(v.hand) == 21 then
+													-- PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_outro")
+													-- Wait(1500)
+													DebugPrint("TABLE "..index..": "..GetPlayerName(v.player):upper().." HAS 21")
+													-- v.player_in = false
+													PlayDealerSpeech(index, "MINIGAME_BJACK_DEALER_BLACKJACK")
+													break
+												elseif handValue(v.hand) > 21 then
+													-- PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_outro")
+													-- Wait(1500)
+													TriggerClientEvent("BLACKJACK:GameEndReaction", v.player, "bad")
+													DebugPrint("TABLE "..index..": "..GetPlayerName(v.player):upper().." WENT BUST")
+													-- v.player_in = false
+													PlayDealerSpeech(index, "MINIGAME_BJACK_DEALER_PLAYER_BUST")
+												else
+													-- Wait(2000)
+													PlayDealerSpeech(index, "MINIGAME_BJACK_DEALER_"..handValue(v.hand))
+												end
+												
+												local card = takeCard(deck)
+												TriggerClientEvent("BLACKJACK:GiveCard", -1, index, v.seat, #v.splitHand+1, card, false, true)
+												-- PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_outro")
+												-- Wait(1500)
+												PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_hit_second_card_player_0" .. 5-v.seat)
+												
+												table.insert(v.splitHand, card)
+												Wait(1500)
+												DebugPrint("TABLE "..index..": DEALT "..GetPlayerName(v.player):upper().." "..card)
+												
+												if handValue(v.splitHand) == 21 then
+													-- PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_outro")
+													-- Wait(1500)
+													DebugPrint("TABLE "..index..": "..GetPlayerName(v.player):upper().." HAS 21")
+													-- v.player_in = false
+													PlayDealerSpeech(index, "MINIGAME_BJACK_DEALER_"..handValue(v.splitHand))
+													break
+												elseif handValue(v.splitHand) > 21 then
+													-- PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_outro")
+													-- Wait(1500)
+													TriggerClientEvent("BLACKJACK:GameEndReaction", v.player, "bad")
+													DebugPrint("TABLE "..index..": "..GetPlayerName(v.player):upper().." WENT BUST")
+													-- v.player_in = false
+													PlayDealerSpeech(index, "MINIGAME_BJACK_DEALER_PLAYER_BUST")
+												else
+													-- Wait(2000)
+													PlayDealerSpeech(index, "MINIGAME_BJACK_DEALER_"..handValue(v.splitHand))
+												end
 											
-											if handValue(v.hand) > 21 and handValue(v.splitHand) > 21 then
-												v.player_in = false
+												-- PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_intro")
+												-- Wait(1500)
+												PlayDealerSpeech(index, "MINIGAME_BJACK_DEALER_ANOTHER_CARD")
+												repeat Wait(0)
+													PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle")
+													DebugPrint("TABLE "..index..": AWAITING MOVE FROM "..GetPlayerName(v.player):upper())
+													TriggerClientEvent("BLACKJACK:RequestMove", v.player)
+													local receivedMove = false
+													local move = "stand"
+													local eventHandler = AddEventHandler("BLACKJACK:ReceivedMove", function(m)
+														if source ~= v.player then return end
+														move = m
+														receivedMove = true
+													end)
+
+													while receivedMove == false and tableTracker[tostring(v.player)] ~= nil do
+														Citizen.Wait(0)
+													end
+													--repeat Wait(0) until receivedMove == true
+													RemoveEventHandler(eventHandler)
+													
+													if not receivedMove then
+														DebugPrint("TABLE "..index..": "..v.player.." WAS PUT OUT DUE TO LEAVING")
+														v.player_in = false
+														TriggerClientEvent("BLACKJACK:RetrieveCards", -1, index, v.seat)
+														print("breaking on 1st hand")
+														break
+													else
+														if move == "hit" then
+															local card = takeCard(deck)
+															TriggerClientEvent("BLACKJACK:GiveCard", -1, index, v.seat, #v.hand+1, card, false, false)
+															-- PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_outro")
+															-- Wait(1500)
+															PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_hit_card_player_0" .. 5-v.seat)
+															table.insert(v.hand, card)
+															Wait(1500)
+															DebugPrint("TABLE "..index..": DEALT "..GetPlayerName(v.player):upper().." "..card)
+															
+															if handValue(v.hand) == 21 then
+																-- PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_outro")
+																-- Wait(1500)
+																DebugPrint("TABLE "..index..": "..GetPlayerName(v.player):upper().." HAS 21")
+																-- v.player_in = false
+																PlayDealerSpeech(index, "MINIGAME_BJACK_DEALER_"..handValue(v.hand))
+																break
+															elseif handValue(v.hand) > 21 then
+																-- PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_outro")
+																-- Wait(1500)
+																TriggerClientEvent("BLACKJACK:GameEndReaction", v.player, "bad")
+																DebugPrint("TABLE "..index..": "..GetPlayerName(v.player):upper().." WENT BUST")
+																-- v.player_in = false
+																PlayDealerSpeech(index, "MINIGAME_BJACK_DEALER_PLAYER_BUST")
+															else
+																-- Wait(1000)
+																PlayDealerSpeech(index, "MINIGAME_BJACK_DEALER_"..handValue(v.hand))
+															end
+														elseif move == "stand" then
+															-- PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_outro_split")
+															-- Wait(1500)
+															break
+														end
+													end
+												until handValue(v.hand) >= 21 or #v.hand == 5
+
+												if v.player_in == true then
+													PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_outro")
+													Wait(1500)
+													
+													PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_intro_split")
+													Wait(1500)
+													PlayDealerSpeech(index, "MINIGAME_BJACK_DEALER_ANOTHER_CARD")
+													
+													repeat Wait(0)
+														PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_split")
+														print(""..v.player)
+														DebugPrint("TABLE "..index..": AWAITING MOVE FROM "..GetPlayerName(v.player):upper())
+														TriggerClientEvent("BLACKJACK:RequestMove", v.player)
+														local receivedMove = false
+														local move = "stand"
+														local eventHandler = AddEventHandler("BLACKJACK:ReceivedMove", function(m)
+															if source ~= v.player then return end
+															move = m
+															receivedMove = true
+														end)
+
+														while receivedMove == false and tableTracker[tostring(v.player)] ~= nil do
+															Citizen.Wait(0)
+														end
+														--repeat Wait(0) until receivedMove == true
+														RemoveEventHandler(eventHandler)
+														
+														if not receivedMove then
+															DebugPrint("TABLE "..index..": "..v.player.." WAS PUT OUT DUE TO LEAVING")
+															v.player_in = false
+															TriggerClientEvent("BLACKJACK:RetrieveCards", -1, index, v.seat)
+															break
+														else												
+															if move == "hit" then
+																local card = takeCard(deck)
+																TriggerClientEvent("BLACKJACK:GiveCard", -1, index, v.seat, #v.splitHand+1, card, false, true)
+																-- PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_outro")
+																-- Wait(1500)
+																PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_hit_second_card_player_0" .. 5-v.seat)
+																table.insert(v.splitHand, card)
+																Wait(1500)
+																DebugPrint("TABLE "..index..": DEALT "..GetPlayerName(v.player):upper().." "..card)
+																
+																if handValue(v.splitHand) == 21 then
+																	-- PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_outro")
+																	-- Wait(1500)
+																	DebugPrint("TABLE "..index..": "..GetPlayerName(v.player):upper().." HAS 21")
+																	-- v.player_in = false
+																	PlayDealerSpeech(index, "MINIGAME_BJACK_DEALER_"..handValue(v.splitHand))
+																	break
+																elseif handValue(v.splitHand) > 21 then
+																	-- PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_outro")
+																	-- Wait(1500)
+																	TriggerClientEvent("BLACKJACK:GameEndReaction", v.player, "bad")
+																	DebugPrint("TABLE "..index..": "..GetPlayerName(v.player):upper().." WENT BUST")
+																	-- v.player_in = false
+																	PlayDealerSpeech(index, "MINIGAME_BJACK_DEALER_PLAYER_BUST")
+																else
+																	-- Wait(1000)
+																	PlayDealerSpeech(index, "MINIGAME_BJACK_DEALER_"..handValue(v.splitHand))
+																end
+															elseif move == "stand" then
+																break
+															end
+														end
+													until handValue(v.splitHand) >= 21 or #v.splitHand == 5
+
+													if handValue(v.hand) > 21 and handValue(v.splitHand) > 21 then
+														v.player_in = false
+													end
+													
+													PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_outro_split")
+													Wait(1500)
+												end
+
+												break
+												
+												-- end
+											elseif move == "stand" then
+												-- PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_outro")
+												-- Wait(1500)
+												break
 											end
-											
-											PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_outro_split")
-											Wait(1500)
-											
-											break
-											
-											-- end
-										elseif move == "stand" then
-											-- PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_outro")
-											-- Wait(1500)
-											break
 										end
 									end
-								end
-								if not v.splitHand then
-									PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_outro")
-									Wait(1500)
+									
+									if not v.splitHand then
+										PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_outro")
+										Wait(1500)
+									end
 								end
 							end
 						end
