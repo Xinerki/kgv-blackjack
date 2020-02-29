@@ -1,5 +1,6 @@
 seatSideAngle = 30
-
+bet = 0
+hand = {}
 satDownCallback = nil
 standUpCallback = nil
 leaveCheckCallback = nil
@@ -173,6 +174,8 @@ end
 function leaveBlackjack()
 	leavingBlackjack = true
 	renderScaleform = false
+	renderBet = false 
+	renderHand = false
 	selectedBet = 1
 end
 
@@ -197,6 +200,8 @@ AddEventHandler("onResourceStop", function(r)
 end)
 
 renderScaleform = false
+renderBet = false 
+renderHand = false
 
 Citizen.CreateThread(function()
 
@@ -205,11 +210,20 @@ Citizen.CreateThread(function()
     repeat Wait(0) until HasScaleformMovieLoaded(scaleform)
 
 	while true do Wait(0)
-	
 		if renderScaleform == true then
 			DrawScaleformMovieFullscreen(scaleform, 255, 255, 255, 255, 0)
 		end
-	
+		
+		local barCount = {1}
+
+		if renderBet == true then
+			DrawTimerBar(barCount, "BET", bet)
+		end
+
+		if renderHand == true then
+			DrawTimerBar(barCount, "HAND", handValue(hand))
+		end
+
 		if _DEBUG == true then
 		
 			-- for i,p in pairs(cardSplitOffsets) do
@@ -677,6 +691,7 @@ AddEventHandler("BLACKJACK:RequestBets", function(index)
 	Citizen.CreateThread(function()
 		scrollerIndex = index
 		renderScaleform = true
+		renderBet = true
 		while true do Wait(0)
 			BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
 			ScaleformMovieMethodAddParamInt(0)
@@ -724,6 +739,8 @@ AddEventHandler("BLACKJACK:RequestBets", function(index)
 			elseif IsControlJustPressed(1, 51) then
 				leavingBlackjack = true
 				renderScaleform = false
+				renderBet = false
+				renderHand = false
 				selectedBet = 1
 				return
 			end
@@ -733,8 +750,6 @@ AddEventHandler("BLACKJACK:RequestBets", function(index)
 			if tables[scrollerIndex].highStakes == true then
 				bet = bet * 10
 			end
-			
-			DisplayHelpText("CURRENT BET:\n"..bet, -1)
 		
 			if IsControlJustPressed(1, 201) then
 				
@@ -753,6 +768,7 @@ AddEventHandler("BLACKJACK:RequestBets", function(index)
 				
 				if canBet then
 					renderScaleform = false
+					renderBet = false
 					if selectedBet < 27 then
 						if leavingBlackjack == true then leaveBlackjack() return end
 
@@ -828,6 +844,7 @@ AddEventHandler("BLACKJACK:RequestMove", function()
 		if leavingBlackjack == true then leaveBlackjack() return end
 		
 		renderScaleform = true
+		renderHand = true
 		while true do Wait(0)
 		
 			BeginScaleformMovieMethod(scaleform, "CLEAR_ALL")
@@ -874,8 +891,6 @@ AddEventHandler("BLACKJACK:RequestMove", function()
 				EndScaleformMovieMethod()
 			end
 			
-			DisplayHelpText("YOUR HAND:\n"..handValue(hand))
-			
 			BeginScaleformMovieMethod(scaleform, "DRAW_INSTRUCTIONAL_BUTTONS")
 			EndScaleformMovieMethod()
 		
@@ -885,7 +900,7 @@ AddEventHandler("BLACKJACK:RequestMove", function()
 				TriggerServerEvent("BLACKJACK:ReceivedMove", "hit")
 				
 				renderScaleform = false
-				
+				renderHand = false
 				local anim = requestCardAnims[math.random(1,#requestCardAnims)]
 				
 				playerBusy = true
@@ -914,7 +929,7 @@ AddEventHandler("BLACKJACK:RequestMove", function()
 				TriggerServerEvent("BLACKJACK:ReceivedMove", "stand")
 				
 				renderScaleform = false
-				
+				renderHand = false
 				local anim = declineCardAnims[math.random(1,#declineCardAnims)]
 				
 				playerBusy = true
@@ -959,7 +974,7 @@ AddEventHandler("BLACKJACK:RequestMove", function()
 					TriggerServerEvent("BLACKJACK:ReceivedMove", "double")
 					
 					renderScaleform = false
-					
+					renderHand = false
 					local anim = "place_bet_double_down"
 					
 					playerBusy = true
@@ -1013,7 +1028,7 @@ AddEventHandler("BLACKJACK:RequestMove", function()
 					TriggerServerEvent("BLACKJACK:ReceivedMove", "split")
 					
 					renderScaleform = false
-					
+					renderHand = false
 					local anim = "place_bet_small_split"
 					
 					if selectedBet > 27 then
