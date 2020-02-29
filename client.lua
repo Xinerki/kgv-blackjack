@@ -1,6 +1,7 @@
 seatSideAngle = 30
 bet = 0
 hand = {}
+splitHand = {}
 timeLeft = 0
 satDownCallback = nil
 standUpCallback = nil
@@ -241,6 +242,9 @@ Citizen.CreateThread(function()
 		end
 
 		if renderHand == true then
+			if #splitHand > 0 then
+				DrawTimerBar(barCount, "SPLIT", handValue(splitHand))
+			end
 			DrawTimerBar(barCount, "HAND", handValue(hand))
 		end
 
@@ -413,6 +417,7 @@ Citizen.CreateThread(function()
 	chips = {}
 							
 	hand = {}
+	splitHand = {}
 	handObjs = {}
 	
 	for i,v in pairs(tables) do
@@ -535,8 +540,10 @@ AddEventHandler("BLACKJACK:DealerTurnOverCard", function(i)
 end)
 
 RegisterNetEvent("BLACKJACK:SplitHand")
-AddEventHandler("BLACKJACK:SplitHand", function(index, seat, splitHandSize)
-	
+AddEventHandler("BLACKJACK:SplitHand", function(index, seat, splitHandSize, _hand, _splitHand)
+	hand = _hand
+	splitHand = _splitHand
+
 	DebugPrint("splitHandSize = "..splitHandSize)
 	DebugPrint("split card coord = "..tostring(GetObjectOffsetFromCoords(tables[index].coords.x, tables[index].coords.y, tables[index].coords.z, tables[index].coords.w, cardSplitOffsets[seat][1])))
 	
@@ -1114,6 +1121,7 @@ RegisterNetEvent("BLACKJACK:GameEndReaction")
 AddEventHandler("BLACKJACK:GameEndReaction", function(result)
 	Citizen.CreateThread(function()
 		hand = {}
+		splitHand = {}
 		renderHand = false
 		-- handObjs = {}
 		-- handObjs[i] = {}
@@ -1182,7 +1190,11 @@ AddEventHandler("BLACKJACK:GiveCard", function(i, seat, handSize, card, flipped,
 	split = split or false
 	
 	if seat == closestChair then
-		table.insert(hand, card)
+		if split == true then
+			table.insert(splitHand, card)
+		else
+			table.insert(hand, card)
+		end
 		
 		DebugPrint("GOT CARD "..card.." ("..cardValue(card)..")")
 		DebugPrint("HAND VALUE "..handValue(hand))

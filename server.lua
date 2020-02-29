@@ -450,7 +450,7 @@ function StartTableThread(i)
 													
 													Wait(500)
 													
-													TriggerClientEvent("BLACKJACK:SplitHand", -1, index, v.seat, #v.splitHand)
+													TriggerClientEvent("BLACKJACK:SplitHand", -1, index, v.seat, #v.splitHand, v.hand, v.splitHand)
 													
 													Wait(1000)
 													
