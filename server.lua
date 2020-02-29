@@ -127,14 +127,14 @@ end
 
 function GiveMoney(player, money)
 	if giveChipsCallback ~= nil then
-		giveChipsCallback(player, money)
+		giveChipsCallback(player, math.tointeger(money))
 	end
 	-- DebugPrint("MONEY: GIVE "..GetPlayerName(player):upper().." "..money)
 end
 
 function TakeMoney(player, money)
 	if takeChipsCallback ~= nil then
-		takeChipsCallback(player, money)
+		takeChipsCallback(player, math.tointeger(money))
 	end
 	-- DebugPrint("MONEY: TAKE "..GetPlayerName(player):upper().." "..money)
 end
