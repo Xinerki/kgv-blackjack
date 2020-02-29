@@ -849,7 +849,7 @@ AddEventHandler("BLACKJACK:RequestBets", function(index, _timeLeft)
 					end
 					return
 				else
-					SetSubtitle("~r~You don't have enough money for the bet.", 5000)
+					DisplayHelpText("You don't have enough money for the bet.", 5000)
 				end
 			end
 		end
@@ -1027,7 +1027,7 @@ AddEventHandler("BLACKJACK:RequestMove", function(_timeLeft)
 
 					return
 				else
-					SetSubtitle("~r~You don't have enough money to double down.", 5000)
+					DisplayHelpText("You don't have enough money to double down.", 5000)
 				end
 			end
 			if IsControlJustPressed(1, 209) and CanSplitHand(hand) == true then
@@ -1086,7 +1086,7 @@ AddEventHandler("BLACKJACK:RequestMove", function(_timeLeft)
 
 					return
 				else
-					SetSubtitle("~r~You don't have enough money to split.", 5000)
+					DisplayHelpText("You don't have enough money to split.", 5000)
 				end
 			end
 			
@@ -1103,6 +1103,15 @@ end)
 RegisterNetEvent("BLACKJACK:GameEndReaction")
 AddEventHandler("BLACKJACK:GameEndReaction", function(result)
 	Citizen.CreateThread(function()
+		
+		if handValue(hand) < 21 and result == "good" then
+			DisplayHelpText("You have Blackjack!", 5000)
+		elseif handValue(hand) > 21 and result ~= good then
+			DisplayHelpText("You went bust.", 5000)
+		else
+			DisplayHelpText("You "..resultNames[result].." with "..handValue(hand)..".", 5000)
+		end
+		
 		hand = {}
 		splitHand = {}
 		renderHand = false
