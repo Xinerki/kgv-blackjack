@@ -63,9 +63,7 @@ function SetSubtitle(subtitle, duration)
     BeginTextCommandPrint("STRING")
     AddTextComponentSubstringWebsite(subtitle)
 	EndTextCommandPrint(duration, true)
-	if _DEBUG == true then
-		print("SUBTITLE: "..subtitle)
-	end
+	DebugPrint("SUBTITLE: "..subtitle)
 end
 
 -- function translateAngle(x1, y1, ang, offset)
@@ -916,7 +914,7 @@ AddEventHandler("BLACKJACK:RequestMove", function(_timeLeft)
 			EndScaleformMovieMethod()
 		
 			if IsControlJustPressed(1, 201) then
-				if leavingBlackjack == true then print("returning") return end
+				if leavingBlackjack == true then DebugPrint("returning") return end
 				
 				TriggerServerEvent("BLACKJACK:ReceivedMove", "hit")
 				
