@@ -753,7 +753,7 @@ AddEventHandler("BLACKJACK:RequestBets", function(index, _timeLeft)
 		
 			BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
 			ScaleformMovieMethodAddParamInt(4)
-			ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(1, 51, 0))
+			ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(1, 202, 0))
 			ScaleformMovieMethodAddParamPlayerNameString("Quit")
 			EndScaleformMovieMethod()
 			
@@ -770,7 +770,7 @@ AddEventHandler("BLACKJACK:RequestBets", function(index, _timeLeft)
 			elseif IsControlJustPressed(1, 174) then -- LEFT
 				selectedBet = selectedBet - 1
 				if selectedBet < 1 then selectedBet = tableLimit end
-			elseif IsControlJustPressed(1, 51) then
+			elseif IsControlJustPressed(1, 202) then -- QUIT
 				leavingBlackjack = true
 				renderScaleform = false
 				renderTime = false
