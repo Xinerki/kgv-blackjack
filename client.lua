@@ -250,34 +250,34 @@ Citizen.CreateThread(function()
 
 		if _DEBUG == true then
 		
-			-- for i,p in pairs(cardSplitOffsets) do
-				-- for _,v in pairs(p) do
-					-- for n,m in pairs(tables) do
-						-- local x, y, z = GetObjectOffsetFromCoords(m.coords.x, m.coords.y, m.coords.z, m.coords.w, v)
+			for i,p in pairs(chipOffsets) do
+				for _,v in pairs(p) do
+					for n,m in pairs(tables) do
+						local x, y, z = GetObjectOffsetFromCoords(m.coords.x, m.coords.y, m.coords.z, m.coords.w, v)
 						
-						-- if GetDistanceBetweenCoords(GetGameplayCamCoord(), x, y, z, true) < 5.0 then
+						if GetDistanceBetweenCoords(GetGameplayCamCoord(), x, y, z, true) < 5.0 then
 							
-							-- DrawMarker(28, v.x, v.y, chipHeights[1], 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 150, 150, 255, 150, false, false, false, false)
+							DrawMarker(28, v.x, v.y, chipHeights[1], 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 150, 150, 255, 150, false, false, false, false)
 						
-							-- SetTextFont(0)
-							-- SetTextProportional(1)
-							-- SetTextScale(0.0, 0.35)
-							-- SetTextColour(255, 255, 255, 255)
-							-- SetTextDropshadow(0, 0, 0, 0, 255)
-							-- SetTextEdge(2, 0, 0, 0, 150)
-							-- SetTextDropShadow()
-							-- SetTextOutline()
-							-- SetTextCentre(1)
-							-- SetTextEntry("STRING")
-							-- SetDrawOrigin(GetObjectOffsetFromCoords(m.coords.x, m.coords.y, m.coords.z, m.coords.w, v.x, v.y, chipHeights[1]))
-							-- AddTextComponentString(tostring(_))
-							-- DrawText(0.0, 0.0)
-							-- ClearDrawOrigin()
+							SetTextFont(0)
+							SetTextProportional(1)
+							SetTextScale(0.0, 0.35)
+							SetTextColour(255, 255, 255, 255)
+							SetTextDropshadow(0, 0, 0, 0, 255)
+							SetTextEdge(2, 0, 0, 0, 150)
+							SetTextDropShadow()
+							SetTextOutline()
+							SetTextCentre(1)
+							SetTextEntry("STRING")
+							SetDrawOrigin(GetObjectOffsetFromCoords(m.coords.x, m.coords.y, m.coords.z, m.coords.w, v.x, v.y, chipHeights[1]))
+							AddTextComponentString(tostring(_))
+							DrawText(0.0, 0.0)
+							ClearDrawOrigin()
 						
-						-- end
-					-- end
-				-- end
-			-- end
+						end
+					end
+				end
+			end
 		
 			if hand then
 				SetTextFont(0)
@@ -642,6 +642,22 @@ AddEventHandler("BLACKJACK:PlaceBetChip", function(index, seat, bet, double, spl
 			local chipXOffset = 0.0
 			local chipYOffset = 0.0
 			
+			if split or double then
+				if seat == 1 then
+					chipXOffset = chipXOffset + 0.03
+					chipYOffset = chipYOffset + 0.05
+				elseif seat == 2 then
+					chipXOffset = chipXOffset + 0.05
+					chipYOffset = chipYOffset + 0.02
+				elseif seat == 3 then
+					chipXOffset = chipXOffset + 0.05
+					chipYOffset = chipYOffset - 0.02
+				elseif seat == 4 then
+					chipXOffset = chipXOffset + 0.02
+					chipYOffset = chipYOffset - 0.05
+				end
+			end
+			
 			for i = 1, #props do
 				local chipGap = 0.0
 
@@ -656,59 +672,26 @@ AddEventHandler("BLACKJACK:PlaceBetChip", function(index, seat, bet, double, spl
 					RequestModel(model)
 					repeat Wait(0) until HasModelLoaded(model)
 				
-					local location = 1
-					if double == true then location = 2 end
+					local location = i
+					-- if double == true then location = 2 end
 					
 					local chip = CreateObjectNoOffset(model, tables[index].coords.x, tables[index].coords.y, tables[index].coords.z, false, false, false)
 					
 					table.insert(spawnedObjects, chip)
 					table.insert(chips[index][seat], chip)
 
-					if split == false then
+					-- if split == false and double == false then
 						SetEntityCoordsNoOffset(chip, GetObjectOffsetFromCoords(tables[index].coords.x, tables[index].coords.y, tables[index].coords.z, tables[index].coords.w, chipOffsets[seat][location].x + chipXOffset, chipOffsets[seat][location].y + chipYOffset, chipHeights[1] + chipGap))
-						SetEntityRotation(chip, 0.0, 0.0, tables[index].coords.w + chipRotationOffsets[seat][2].z)
-					else
-						SetEntityCoordsNoOffset(chip, GetObjectOffsetFromCoords(tables[index].coords.x, tables[index].coords.y, tables[index].coords.z, tables[index].coords.w, chipSplitOffsets[seat][2].x + chipXOffset, chipSplitOffsets[seat][2].y + chipYOffset, chipHeights[1] + chipGap))
-						SetEntityRotation(chip, 0.0, 0.0, tables[index].coords.w + chipSplitRotationOffsets[seat][1].z)
-					end
+						SetEntityRotation(chip, 0.0, 0.0, tables[index].coords.w + chipRotationOffsets[seat][location].z)
+					-- else
+						-- SetEntityCoordsNoOffset(chip, GetObjectOffsetFromCoords(tables[index].coords.x, tables[index].coords.y, tables[index].coords.z, tables[index].coords.w, chipSplitOffsets[seat][location].x + chipXOffset, chipSplitOffsets[seat][location].y + chipYOffset, chipHeights[1] + chipGap))
+						-- SetEntityRotation(chip, 0.0, 0.0, tables[index].coords.w + chipSplitRotationOffsets[seat][location].z)
+					-- end
 
 					chipGap = chipGap + ((chipThickness[model] ~= nil) and chipThickness[model] or 0.0)
 				end
 
 				-- Hacky way to setup each seats split chips
-				if seat == 1 then
-					if split == false then
-						chipXOffset = chipXOffset - 0.03
-						chipYOffset = chipYOffset - 0.05
-					else
-						chipXOffset = chipXOffset + 0.03
-						chipYOffset = chipYOffset + 0.05				
-					end
-				elseif seat == 2 then
-					if split == false then
-						chipXOffset = chipXOffset - 0.05
-						chipYOffset = chipYOffset - 0.02
-					else
-						chipXOffset = chipXOffset + 0.05
-						chipYOffset = chipYOffset + 0.02						
-					end
-				elseif seat == 3 then
-					if split == false then
-						chipXOffset = chipXOffset - 0.05
-						chipYOffset = chipYOffset + 0.02
-					else
-						chipXOffset = chipXOffset + 0.05
-						chipYOffset = chipYOffset - 0.02						
-					end
-				elseif seat == 4 then
-					if split == false then
-						chipXOffset = chipXOffset - 0.02
-						chipYOffset = chipYOffset + 0.05
-					else
-						chipXOffset = chipXOffset + 0.02
-						chipYOffset = chipYOffset - 0.05
-					end
-				end
 			end
 		end
 	end)
