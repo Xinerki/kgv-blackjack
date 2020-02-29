@@ -116,10 +116,12 @@ function handValue(hand)
 end
 
 function CanSplitHand(hand)
-	-- if hand[1] and hand[2] and #hand == 2 then
-	if hand[1]:sub(-3) == hand[2]:sub(-3) and #hand == 2 then
-		if cardValue(hand[1]) == cardValue(hand[2]) then
-			return true
+	--if hand[1] and hand[2] and #hand == 2 then
+	if hand[1] and hand[2] then
+		if hand[1]:sub(-3) == hand[2]:sub(-3) and #hand == 2 then
+			if cardValue(hand[1]) == cardValue(hand[2]) then
+				return true
+			end
 		end
 	end
 	return _DEBUG
