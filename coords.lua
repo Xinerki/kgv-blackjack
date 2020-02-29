@@ -483,6 +483,8 @@ bettingNums = {
 	50000, -- 40 Low table limit, betting numbers added after this will be high stakes only
 }
 
+bettingTime = 50
+moveTime = 30
 --[[
 	case 10:
 		return joaat("vw_prop_chip_10dollar_x1");

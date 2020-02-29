@@ -1,6 +1,7 @@
 seatSideAngle = 30
 bet = 0
 hand = {}
+timeLeft = 0
 satDownCallback = nil
 standUpCallback = nil
 leaveCheckCallback = nil
@@ -176,9 +177,19 @@ end
 function leaveBlackjack()
 	leavingBlackjack = true
 	renderScaleform = false
+	renderTime = false
 	renderBet = false 
 	renderHand = false
 	selectedBet = 1
+end
+
+function s2m(s)
+    if s <= 0 then
+        return "00:00"
+    else
+        local m = string.format("%02.f", math.floor(s/60))
+        return m..":"..string.format("%02.f", math.floor(s - m * 60))
+    end
 end
 
 RegisterCommand("bet", function(source, args, rawCommand)
@@ -202,6 +213,7 @@ AddEventHandler("onResourceStop", function(r)
 end)
 
 renderScaleform = false
+renderTime = false
 renderBet = false 
 renderHand = false
 
@@ -217,6 +229,12 @@ Citizen.CreateThread(function()
 		end
 		
 		local barCount = {1}
+
+		if renderTime == true and timeLeft ~= nil then
+			if timeLeft > 0 then
+				DrawTimerBar(barCount, "TIME", s2m(timeLeft))
+			end
+		end
 
 		if renderBet == true then
 			DrawTimerBar(barCount, "BET", bet)
@@ -466,6 +484,11 @@ end)
 	-- end
 -- end
 
+RegisterNetEvent("BLACKJACK:SyncTimer")
+AddEventHandler("BLACKJACK:SyncTimer", function(_timeLeft)
+	timeLeft = _timeLeft
+end)
+
 RegisterNetEvent("BLACKJACK:PlayDealerAnim")
 AddEventHandler("BLACKJACK:PlayDealerAnim", function(i, animDict, anim)
 	Citizen.CreateThread(function()
@@ -687,12 +710,14 @@ end)
 RegisterNetEvent("BLACKJACK:BetReceived")
 
 RegisterNetEvent("BLACKJACK:RequestBets")
-AddEventHandler("BLACKJACK:RequestBets", function(index)
+AddEventHandler("BLACKJACK:RequestBets", function(index, _timeLeft)
+	timeLeft = _timeLeft
 	if leavingBlackjack == true then leaveBlackjack() return end
 
 	Citizen.CreateThread(function()
 		scrollerIndex = index
 		renderScaleform = true
+		renderTime = true
 		renderBet = true
 		while true do Wait(0)
 			BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
@@ -741,6 +766,7 @@ AddEventHandler("BLACKJACK:RequestBets", function(index)
 			elseif IsControlJustPressed(1, 51) then
 				leavingBlackjack = true
 				renderScaleform = false
+				renderTime = false
 				renderBet = false
 				renderHand = false
 				selectedBet = 1
@@ -770,6 +796,7 @@ AddEventHandler("BLACKJACK:RequestBets", function(index)
 				
 				if canBet then
 					renderScaleform = false
+					renderTime = false
 					renderBet = false
 					if selectedBet < 27 then
 						if leavingBlackjack == true then leaveBlackjack() return end
@@ -841,11 +868,13 @@ AddEventHandler("BLACKJACK:RequestBets", function(index)
 end)
 
 RegisterNetEvent("BLACKJACK:RequestMove")
-AddEventHandler("BLACKJACK:RequestMove", function()
+AddEventHandler("BLACKJACK:RequestMove", function(_timeLeft)
 	Citizen.CreateThread(function()
+		timeLeft = _timeLeft
 		if leavingBlackjack == true then leaveBlackjack() return end
 		
 		renderScaleform = true
+		renderTime = true
 		renderHand = true
 		while true do Wait(0)
 		
@@ -902,6 +931,7 @@ AddEventHandler("BLACKJACK:RequestMove", function()
 				TriggerServerEvent("BLACKJACK:ReceivedMove", "hit")
 				
 				renderScaleform = false
+				renderTime = false
 				renderHand = false
 				local anim = requestCardAnims[math.random(1,#requestCardAnims)]
 				
@@ -931,6 +961,7 @@ AddEventHandler("BLACKJACK:RequestMove", function()
 				TriggerServerEvent("BLACKJACK:ReceivedMove", "stand")
 				
 				renderScaleform = false
+				renderTime = false
 				renderHand = false
 				local anim = declineCardAnims[math.random(1,#declineCardAnims)]
 				
@@ -976,6 +1007,7 @@ AddEventHandler("BLACKJACK:RequestMove", function()
 					TriggerServerEvent("BLACKJACK:ReceivedMove", "double")
 					
 					renderScaleform = false
+					renderTime = false
 					renderHand = false
 					local anim = "place_bet_double_down"
 					
@@ -1030,6 +1062,7 @@ AddEventHandler("BLACKJACK:RequestMove", function()
 					TriggerServerEvent("BLACKJACK:ReceivedMove", "split")
 					
 					renderScaleform = false
+					renderTime = false
 					renderHand = false
 					local anim = "place_bet_small_split"
 					
@@ -1081,7 +1114,7 @@ RegisterNetEvent("BLACKJACK:GameEndReaction")
 AddEventHandler("BLACKJACK:GameEndReaction", function(result)
 	Citizen.CreateThread(function()
 		hand = {}
-		
+		renderHand = false
 		-- handObjs = {}
 		-- handObjs[i] = {}
 		
@@ -1142,7 +1175,6 @@ AddEventHandler("BLACKJACK:RetrieveCards", function(i, seat)
 	end
 end)
 	
-
 RegisterNetEvent("BLACKJACK:GiveCard")
 AddEventHandler("BLACKJACK:GiveCard", function(i, seat, handSize, card, flipped, split)
 	
