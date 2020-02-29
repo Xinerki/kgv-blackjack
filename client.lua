@@ -782,7 +782,7 @@ AddEventHandler("BLACKJACK:RequestBets", function(index, _timeLeft)
 			
 			bet = bettingNums[selectedBet] or 10000
 			
-			if #bettingNums > lowTableLimit and tables[scrollerIndex].highStakes == true then
+			if #bettingNums < lowTableLimit and tables[scrollerIndex].highStakes == true then
 				bet = bet * 10
 			end
 		
