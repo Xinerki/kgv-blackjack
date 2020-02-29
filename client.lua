@@ -1,8 +1,12 @@
 seatSideAngle = 30
-
+bet = 0
+hand = {}
+splitHand = {}
+timeLeft = 0
 satDownCallback = nil
 standUpCallback = nil
 leaveCheckCallback = nil
+canSitDownCallback = nil
 
 --[===[
 	exports["kgv-blackjack"]:SetSatDownCallback(function()
@@ -22,6 +26,14 @@ leaveCheckCallback = nil
 		-- return false
 		-- end
 	end)
+
+	exports["kgv-blackjack"]:SetCanSitDownCallback(function()
+		-- if not isCuffed and not isBeingCarried and not isInJail??? then
+		-- return true
+		-- else
+		-- return false
+		-- end
+	end)
 --]===]
 
 function SetSatDownCallback(cb)
@@ -34,6 +46,10 @@ end
 
 function SetLeaveCheckCallback(cb)
 	leaveCheckCallback = cb
+end
+
+function SetCanSitDownCallback(cb)
+	canSitDownCallback = cb
 end
 
 function DisplayHelpText(helpText, time)
@@ -102,10 +118,12 @@ function handValue(hand)
 end
 
 function CanSplitHand(hand)
-	-- if hand[1] and hand[2] and #hand == 2 then
-	if hand[1]:sub(-3) == hand[2]:sub(-3) and #hand == 2 then
-		if cardValue(hand[1]) == cardValue(hand[2]) then
-			return true
+	--if hand[1] and hand[2] and #hand == 2 then
+	if hand[1] and hand[2] then
+		if hand[1]:sub(-3) == hand[2]:sub(-3) and #hand == 2 then
+			if cardValue(hand[1]) == cardValue(hand[2]) then
+				return true
+			end
 		end
 	end
 	return _DEBUG
@@ -160,7 +178,19 @@ end
 function leaveBlackjack()
 	leavingBlackjack = true
 	renderScaleform = false
+	renderTime = false
+	renderBet = false 
+	renderHand = false
 	selectedBet = 1
+end
+
+function s2m(s)
+    if s <= 0 then
+        return "00:00"
+    else
+        local m = string.format("%02.f", math.floor(s/60))
+        return m..":"..string.format("%02.f", math.floor(s - m * 60))
+    end
 end
 
 RegisterCommand("bet", function(source, args, rawCommand)
@@ -184,6 +214,9 @@ AddEventHandler("onResourceStop", function(r)
 end)
 
 renderScaleform = false
+renderTime = false
+renderBet = false 
+renderHand = false
 
 Citizen.CreateThread(function()
 
@@ -192,11 +225,29 @@ Citizen.CreateThread(function()
     repeat Wait(0) until HasScaleformMovieLoaded(scaleform)
 
 	while true do Wait(0)
-	
 		if renderScaleform == true then
 			DrawScaleformMovieFullscreen(scaleform, 255, 255, 255, 255, 0)
 		end
-	
+		
+		local barCount = {1}
+
+		if renderTime == true and timeLeft ~= nil then
+			if timeLeft > 0 then
+				DrawTimerBar(barCount, "TIME", s2m(timeLeft))
+			end
+		end
+
+		if renderBet == true then
+			DrawTimerBar(barCount, "BET", bet)
+		end
+
+		if renderHand == true then
+			if #splitHand > 0 then
+				DrawTimerBar(barCount, "SPLIT", handValue(splitHand))
+			end
+			DrawTimerBar(barCount, "HAND", handValue(hand))
+		end
+
 		if _DEBUG == true then
 		
 			-- for i,p in pairs(cardSplitOffsets) do
@@ -366,6 +417,7 @@ Citizen.CreateThread(function()
 	chips = {}
 							
 	hand = {}
+	splitHand = {}
 	handObjs = {}
 	
 	for i,v in pairs(tables) do
@@ -437,6 +489,11 @@ end)
 	-- end
 -- end
 
+RegisterNetEvent("BLACKJACK:SyncTimer")
+AddEventHandler("BLACKJACK:SyncTimer", function(_timeLeft)
+	timeLeft = _timeLeft
+end)
+
 RegisterNetEvent("BLACKJACK:PlayDealerAnim")
 AddEventHandler("BLACKJACK:PlayDealerAnim", function(i, animDict, anim)
 	Citizen.CreateThread(function()
@@ -483,8 +540,10 @@ AddEventHandler("BLACKJACK:DealerTurnOverCard", function(i)
 end)
 
 RegisterNetEvent("BLACKJACK:SplitHand")
-AddEventHandler("BLACKJACK:SplitHand", function(index, seat, splitHandSize)
-	
+AddEventHandler("BLACKJACK:SplitHand", function(index, seat, splitHandSize, _hand, _splitHand)
+	hand = _hand
+	splitHand = _splitHand
+
 	DebugPrint("splitHandSize = "..splitHandSize)
 	DebugPrint("split card coord = "..tostring(GetObjectOffsetFromCoords(tables[index].coords.x, tables[index].coords.y, tables[index].coords.z, tables[index].coords.w, cardSplitOffsets[seat][1])))
 	
@@ -658,12 +717,15 @@ end)
 RegisterNetEvent("BLACKJACK:BetReceived")
 
 RegisterNetEvent("BLACKJACK:RequestBets")
-AddEventHandler("BLACKJACK:RequestBets", function(index)
+AddEventHandler("BLACKJACK:RequestBets", function(index, _timeLeft)
+	timeLeft = _timeLeft
 	if leavingBlackjack == true then leaveBlackjack() return end
 
 	Citizen.CreateThread(function()
 		scrollerIndex = index
 		renderScaleform = true
+		renderTime = true
+		renderBet = true
 		while true do Wait(0)
 			BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
 			ScaleformMovieMethodAddParamInt(0)
@@ -711,6 +773,9 @@ AddEventHandler("BLACKJACK:RequestBets", function(index)
 			elseif IsControlJustPressed(1, 51) then
 				leavingBlackjack = true
 				renderScaleform = false
+				renderTime = false
+				renderBet = false
+				renderHand = false
 				selectedBet = 1
 				return
 			end
@@ -720,8 +785,6 @@ AddEventHandler("BLACKJACK:RequestBets", function(index)
 			if tables[scrollerIndex].highStakes == true then
 				bet = bet * 10
 			end
-			
-			DisplayHelpText("CURRENT BET:\n"..bet, -1)
 		
 			if IsControlJustPressed(1, 201) then
 				
@@ -740,6 +803,8 @@ AddEventHandler("BLACKJACK:RequestBets", function(index)
 				
 				if canBet then
 					renderScaleform = false
+					renderTime = false
+					renderBet = false
 					if selectedBet < 27 then
 						if leavingBlackjack == true then leaveBlackjack() return end
 
@@ -810,11 +875,14 @@ AddEventHandler("BLACKJACK:RequestBets", function(index)
 end)
 
 RegisterNetEvent("BLACKJACK:RequestMove")
-AddEventHandler("BLACKJACK:RequestMove", function()
+AddEventHandler("BLACKJACK:RequestMove", function(_timeLeft)
 	Citizen.CreateThread(function()
+		timeLeft = _timeLeft
 		if leavingBlackjack == true then leaveBlackjack() return end
 		
 		renderScaleform = true
+		renderTime = true
+		renderHand = true
 		while true do Wait(0)
 		
 			BeginScaleformMovieMethod(scaleform, "CLEAR_ALL")
@@ -861,8 +929,6 @@ AddEventHandler("BLACKJACK:RequestMove", function()
 				EndScaleformMovieMethod()
 			end
 			
-			DisplayHelpText("YOUR HAND:\n"..handValue(hand))
-			
 			BeginScaleformMovieMethod(scaleform, "DRAW_INSTRUCTIONAL_BUTTONS")
 			EndScaleformMovieMethod()
 		
@@ -872,7 +938,8 @@ AddEventHandler("BLACKJACK:RequestMove", function()
 				TriggerServerEvent("BLACKJACK:ReceivedMove", "hit")
 				
 				renderScaleform = false
-				
+				renderTime = false
+				renderHand = false
 				local anim = requestCardAnims[math.random(1,#requestCardAnims)]
 				
 				playerBusy = true
@@ -901,7 +968,8 @@ AddEventHandler("BLACKJACK:RequestMove", function()
 				TriggerServerEvent("BLACKJACK:ReceivedMove", "stand")
 				
 				renderScaleform = false
-				
+				renderTime = false
+				renderHand = false
 				local anim = declineCardAnims[math.random(1,#declineCardAnims)]
 				
 				playerBusy = true
@@ -946,7 +1014,8 @@ AddEventHandler("BLACKJACK:RequestMove", function()
 					TriggerServerEvent("BLACKJACK:ReceivedMove", "double")
 					
 					renderScaleform = false
-					
+					renderTime = false
+					renderHand = false
 					local anim = "place_bet_double_down"
 					
 					playerBusy = true
@@ -1000,7 +1069,8 @@ AddEventHandler("BLACKJACK:RequestMove", function()
 					TriggerServerEvent("BLACKJACK:ReceivedMove", "split")
 					
 					renderScaleform = false
-					
+					renderTime = false
+					renderHand = false
 					local anim = "place_bet_small_split"
 					
 					if selectedBet > 27 then
@@ -1051,7 +1121,8 @@ RegisterNetEvent("BLACKJACK:GameEndReaction")
 AddEventHandler("BLACKJACK:GameEndReaction", function(result)
 	Citizen.CreateThread(function()
 		hand = {}
-		
+		splitHand = {}
+		renderHand = false
 		-- handObjs = {}
 		-- handObjs[i] = {}
 		
@@ -1112,7 +1183,6 @@ AddEventHandler("BLACKJACK:RetrieveCards", function(i, seat)
 	end
 end)
 	
-
 RegisterNetEvent("BLACKJACK:GiveCard")
 AddEventHandler("BLACKJACK:GiveCard", function(i, seat, handSize, card, flipped, split)
 	
@@ -1120,7 +1190,11 @@ AddEventHandler("BLACKJACK:GiveCard", function(i, seat, handSize, card, flipped,
 	split = split or false
 	
 	if seat == closestChair then
-		table.insert(hand, card)
+		if split == true then
+			table.insert(splitHand, card)
+		else
+			table.insert(hand, card)
+		end
 		
 		DebugPrint("GOT CARD "..card.." ("..cardValue(card)..")")
 		DebugPrint("HAND VALUE "..handValue(hand))
@@ -1227,9 +1301,14 @@ function ProcessTables()
 					if angle > 0 then seatAnim = "sit_enter_left" end
 					if angle < 0 then seatAnim = "sit_enter_right" end
 					if angle > seatSideAngle or angle < -seatSideAngle then seatAnim = seatAnim .. "_side" end
-					
-					if GetDistanceBetweenCoords(coords, GetEntityCoords(PlayerPedId()), true) < 1.5 and not IsSeatOccupied(coords, 0.5) then
-						
+
+					local canSit = true
+
+					if canSitDownCallback ~= nil then
+						canSit = canSitDownCallback()
+					end
+
+					if GetDistanceBetweenCoords(coords, GetEntityCoords(PlayerPedId()), true) < 1.5 and not IsSeatOccupied(coords, 0.5) and canSit then
 						if highStakes then
 							DisplayHelpText("Press ~INPUT_CONTEXT~ to play High-Limit Blackjack.")
 						else
@@ -1375,3 +1454,4 @@ Citizen.CreateThread(ProcessTables)
 exports("SetSatDownCallback", SetSatDownCallback)
 exports("SetStandUpCallback", SetStandUpCallback)
 exports("SetLeaveCheckCallback", SetLeaveCheckCallback)
+exports("SetCanSitDownCallback", SetCanSitDownCallback)
