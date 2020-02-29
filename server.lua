@@ -240,8 +240,7 @@ function StartTableThread(i)
 						TriggerClientEvent("BLACKJACK:SyncTimer", v.player, bettingTime - timeTracker[index])
 					end -- Remove players from round who didn't bet in time		
 					Wait(1000)
-					timeTracker[index] = timeTracker[index] + 1
-					print(timeTracker[index])
+					timeTracker[index] = timeTracker[index] + 1					
 				until HaveAllPlayersBetted(players[index]) or #players[index] == 0 or timeTracker[index] >= bettingTime
 				
 				if #players[index] == 0 then
@@ -361,8 +360,7 @@ function StartTableThread(i)
 													TriggerClientEvent("BLACKJACK:SyncTimer", v.player, moveTime - timeTracker[index])
 												end	
 												Wait(1000)
-												timeTracker[index] = timeTracker[index] + 1
-												print(timeTracker[index])
+												timeTracker[index] = timeTracker[index] + 1												
 											end
 											--repeat Wait(0) until receivedMove == true
 											RemoveEventHandler(eventHandler)
@@ -535,8 +533,7 @@ function StartTableThread(i)
 																TriggerClientEvent("BLACKJACK:SyncTimer", v.player, moveTime - timeTracker[index])
 															end	
 															Wait(1000)
-															timeTracker[index] = timeTracker[index] + 1
-															print(timeTracker[index])
+															timeTracker[index] = timeTracker[index] + 1															
 														end
 
 														--repeat Wait(0) until receivedMove == true
@@ -612,8 +609,7 @@ function StartTableThread(i)
 																	TriggerClientEvent("BLACKJACK:SyncTimer", v.player, moveTime - timeTracker[index])
 																end	
 																Wait(1000)
-																timeTracker[index] = timeTracker[index] + 1
-																print(timeTracker[index])
+																timeTracker[index] = timeTracker[index] + 1																
 															end
 															--repeat Wait(0) until receivedMove == true
 															RemoveEventHandler(eventHandler)
@@ -816,6 +812,8 @@ function StartTableThread(i)
 							v.hand = {}
 							v.splitHand = nil
 						end
+
+						timeTracker[index] = 0
 					end
 				end
 			end
