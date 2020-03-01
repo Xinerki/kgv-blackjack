@@ -934,7 +934,7 @@ AddEventHandler("BLACKJACK:RequestMove", function(_timeLeft)
 		ScaleformMovieMethodAddParamPlayerNameString("Stand")
 		EndScaleformMovieMethod()
 		
-		if #hand < 3 then
+		if #hand < 3 and #splitHand == 0 then
 			BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
 			ScaleformMovieMethodAddParamInt(3)
 			ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(1, 192, 0))
@@ -1014,7 +1014,7 @@ AddEventHandler("BLACKJACK:RequestMove", function(_timeLeft)
 
 				return
 			end
-			if IsControlJustPressed(1, 192) and #hand == 2 then
+			if IsControlJustPressed(1, 192) and #hand == 2 and #splitHand == 0 then
 				if leavingBlackjack == true then leaveBlackjack() return end
 
 				TriggerServerEvent("BLACKJACK:CheckPlayerBet", g_seat, bet)
