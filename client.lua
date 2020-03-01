@@ -1248,194 +1248,204 @@ function ProcessTables()
 	RequestAnimDict("anim_casino_b@amb@casino@games@shared@player@")
 	
 	while true do Wait(0)
-		for i,v in pairs(tables) do
-			local cord = v.coords
-			local highStakes = v.highStakes
-			
-			if GetDistanceBetweenCoords(cord.x, cord.y, cord.z, GetEntityCoords(PlayerPedId()), true) < 3.0 then
-			
-				-- local pCoords = vector3(cord.x, cord.y, cord.z)
-				local pCoords = GetEntityCoords(PlayerPedId())
-				local tableObj = GetClosestObjectOfType(pCoords, 1.0, `vw_prop_casino_blckjack_01`, false, false, false)
-				-- highStakes = false
+		local playerPed = PlayerPedId()
+
+		if not IsEntityDead(playerPed) then
+			for i,v in pairs(tables) do
+				local cord = v.coords
+				local highStakes = v.highStakes
 				
-				if GetEntityCoords(tableObj) == vector3(0.0, 0.0, 0.0) then
-					tableObj = GetClosestObjectOfType(pCoords, 1.0, `vw_prop_casino_blckjack_01b`, false, false, false)
-					-- highStakes = true
-				end
+				if GetDistanceBetweenCoords(cord.x, cord.y, cord.z, GetEntityCoords(PlayerPedId()), true) < 3.0 then
 				
-				if GetEntityCoords(tableObj) ~= vector3(0.0, 0.0, 0.0) then
-					closestChair = 1
-					local coords = GetWorldPositionOfEntityBone(tableObj, GetEntityBoneIndexByName(tableObj, "Chair_Base_0"..closestChair))
-					local rot = GetWorldRotationOfEntityBone(tableObj, GetEntityBoneIndexByName(tableObj, "Chair_Base_0"..closestChair))
-					dist = GetDistanceBetweenCoords(coords, GetEntityCoords(PlayerPedId()), true)
+					-- local pCoords = vector3(cord.x, cord.y, cord.z)
+					local pCoords = GetEntityCoords(PlayerPedId())
+					local tableObj = GetClosestObjectOfType(pCoords, 1.0, `vw_prop_casino_blckjack_01`, false, false, false)
+					-- highStakes = false
 					
-					for i=1,4 do
-						local coords = GetWorldPositionOfEntityBone(tableObj, GetEntityBoneIndexByName(tableObj, "Chair_Base_0"..i))
-						if GetDistanceBetweenCoords(coords, GetEntityCoords(PlayerPedId()), true) < dist then
-							dist = GetDistanceBetweenCoords(coords, GetEntityCoords(PlayerPedId()), true)
-							closestChair = i
-						end
+					if GetEntityCoords(tableObj) == vector3(0.0, 0.0, 0.0) then
+						tableObj = GetClosestObjectOfType(pCoords, 1.0, `vw_prop_casino_blckjack_01b`, false, false, false)
+						-- highStakes = true
 					end
 					
-					local coords = GetWorldPositionOfEntityBone(tableObj, GetEntityBoneIndexByName(tableObj, "Chair_Base_0"..closestChair))
-					local rot = GetWorldRotationOfEntityBone(tableObj, GetEntityBoneIndexByName(tableObj, "Chair_Base_0"..closestChair))
-					
-					g_coords = coords
-					g_rot = rot
-					
-					local angle = rot.z-findRotation(coords.x, coords.y, pCoords.x, pCoords.y)+90.0
-					
-					local seatAnim = "sit_enter_"
-					
-					if angle > 0 then seatAnim = "sit_enter_left" end
-					if angle < 0 then seatAnim = "sit_enter_right" end
-					if angle > seatSideAngle or angle < -seatSideAngle then seatAnim = seatAnim .. "_side" end
-
-					local canSit = true
-
-					if canSitDownCallback ~= nil then
-						canSit = canSitDownCallback()
-					end
-
-					if GetDistanceBetweenCoords(coords, GetEntityCoords(PlayerPedId()), true) < 1.5 and not IsSeatOccupied(coords, 0.5) and canSit then
-						if highStakes then
-							DisplayHelpText("Press ~INPUT_CONTEXT~ to play High-Limit Blackjack.")
-						else
-							DisplayHelpText("Press ~INPUT_CONTEXT~ to play Blackjack.")
-						end
+					if GetEntityCoords(tableObj) ~= vector3(0.0, 0.0, 0.0) then
+						closestChair = 1
+						local coords = GetWorldPositionOfEntityBone(tableObj, GetEntityBoneIndexByName(tableObj, "Chair_Base_0"..closestChair))
+						local rot = GetWorldRotationOfEntityBone(tableObj, GetEntityBoneIndexByName(tableObj, "Chair_Base_0"..closestChair))
+						dist = GetDistanceBetweenCoords(coords, GetEntityCoords(PlayerPedId()), true)
 						
-						if _DEBUG == true then
-							SetTextFont(0)
-							SetTextProportional(1)
-							SetTextScale(0.0, 0.45)
-							SetTextColour(255, 255, 255, 255)
-							SetTextDropshadow(0, 0, 0, 0, 255)
-							SetTextEdge(2, 0, 0, 0, 150)
-							SetTextDropShadow()
-							SetTextOutline()
-							SetTextEntry("STRING")
-							SetTextCentre(1)
-							SetDrawOrigin(cord.x, cord.y, cord.z)
-							AddTextComponentString("table = "..i)
-							DrawText(0.0, 0.0)
-							ClearDrawOrigin()
-						end
-						
-						if IsControlJustPressed(1, 51) then
-							if satDownCallback ~= nil then
-								satDownCallback()
+						for i=1,4 do
+							local coords = GetWorldPositionOfEntityBone(tableObj, GetEntityBoneIndexByName(tableObj, "Chair_Base_0"..i))
+							if GetDistanceBetweenCoords(coords, GetEntityCoords(PlayerPedId()), true) < dist then
+								dist = GetDistanceBetweenCoords(coords, GetEntityCoords(PlayerPedId()), true)
+								closestChair = i
 							end
+						end
+						
+						local coords = GetWorldPositionOfEntityBone(tableObj, GetEntityBoneIndexByName(tableObj, "Chair_Base_0"..closestChair))
+						local rot = GetWorldRotationOfEntityBone(tableObj, GetEntityBoneIndexByName(tableObj, "Chair_Base_0"..closestChair))
+						
+						g_coords = coords
+						g_rot = rot
+						
+						local angle = rot.z-findRotation(coords.x, coords.y, pCoords.x, pCoords.y)+90.0
+						
+						local seatAnim = "sit_enter_"
+						
+						if angle > 0 then seatAnim = "sit_enter_left" end
+						if angle < 0 then seatAnim = "sit_enter_right" end
+						if angle > seatSideAngle or angle < -seatSideAngle then seatAnim = seatAnim .. "_side" end
 
-							local initPos = GetAnimInitialOffsetPosition("anim_casino_b@amb@casino@games@shared@player@", seatAnim, coords, rot, 0.01, 2)
-							local initRot = GetAnimInitialOffsetRotation("anim_casino_b@amb@casino@games@shared@player@", seatAnim, coords, rot, 0.01, 2)
+						local canSit = true
+
+						if canSitDownCallback ~= nil then
+							canSit = canSitDownCallback()
+						end
+
+						if GetDistanceBetweenCoords(coords, GetEntityCoords(PlayerPedId()), true) < 1.5 and not IsSeatOccupied(coords, 0.5) and canSit then
+							if highStakes then
+								DisplayHelpText("Press ~INPUT_CONTEXT~ to play High-Limit Blackjack.")
+							else
+								DisplayHelpText("Press ~INPUT_CONTEXT~ to play Blackjack.")
+							end
 							
-							TaskGoStraightToCoord(PlayerPedId(), initPos, 1.0, 5000, initRot.z, 0.01)
-							repeat Wait(0) until GetScriptTaskStatus(PlayerPedId(), 2106541073) == 7
-							Wait(50)
+							if _DEBUG == true then
+								SetTextFont(0)
+								SetTextProportional(1)
+								SetTextScale(0.0, 0.45)
+								SetTextColour(255, 255, 255, 255)
+								SetTextDropshadow(0, 0, 0, 0, 255)
+								SetTextEdge(2, 0, 0, 0, 150)
+								SetTextDropShadow()
+								SetTextOutline()
+								SetTextEntry("STRING")
+								SetTextCentre(1)
+								SetDrawOrigin(cord.x, cord.y, cord.z)
+								AddTextComponentString("table = "..i)
+								DrawText(0.0, 0.0)
+								ClearDrawOrigin()
+							end
 							
-							SetPedCurrentWeaponVisible(PlayerPedId(), 0, true, 0, 0)
-							
-							local scene = NetworkCreateSynchronisedScene(coords, rot, 2, true, true, 1065353216, 0, 1065353216)
-							NetworkAddPedToSynchronisedScene(PlayerPedId(), scene, "anim_casino_b@amb@casino@games@shared@player@", seatAnim, 2.0, -2.0, 13, 16, 1148846080, 0)
-							NetworkStartSynchronisedScene(scene)
+							if IsControlJustPressed(1, 51) then
+								if satDownCallback ~= nil then
+									satDownCallback()
+								end
 
-							local scene = NetworkConvertSynchronisedSceneToSynchronizedScene(scene)
-							repeat Wait(0) until GetSynchronizedScenePhase(scene) >= 0.99 or HasAnimEventFired(PlayerPedId(), 2038294702) or HasAnimEventFired(PlayerPedId(), -1424880317)
+								local initPos = GetAnimInitialOffsetPosition("anim_casino_b@amb@casino@games@shared@player@", seatAnim, coords, rot, 0.01, 2)
+								local initRot = GetAnimInitialOffsetRotation("anim_casino_b@amb@casino@games@shared@player@", seatAnim, coords, rot, 0.01, 2)
+								
+								TaskGoStraightToCoord(PlayerPedId(), initPos, 1.0, 5000, initRot.z, 0.01)
+								repeat Wait(0) until GetScriptTaskStatus(PlayerPedId(), 2106541073) == 7
+								Wait(50)
+								
+								SetPedCurrentWeaponVisible(PlayerPedId(), 0, true, 0, 0)
+								
+								local scene = NetworkCreateSynchronisedScene(coords, rot, 2, true, true, 1065353216, 0, 1065353216)
+								NetworkAddPedToSynchronisedScene(PlayerPedId(), scene, "anim_casino_b@amb@casino@games@shared@player@", seatAnim, 2.0, -2.0, 13, 16, 1148846080, 0)
+								NetworkStartSynchronisedScene(scene)
 
-							Wait(1000)
+								local scene = NetworkConvertSynchronisedSceneToSynchronizedScene(scene)
+								repeat Wait(0) until GetSynchronizedScenePhase(scene) >= 0.99 or HasAnimEventFired(PlayerPedId(), 2038294702) or HasAnimEventFired(PlayerPedId(), -1424880317)
 
-							idleVar = "idle_cardgames"
+								Wait(1000)
 
-							scene = NetworkCreateSynchronisedScene(coords, rot, 2, true, true, 1065353216, 0, 1065353216)
-							NetworkAddPedToSynchronisedScene(PlayerPedId(), scene, "anim_casino_b@amb@casino@games@shared@player@", "idle_cardgames", 2.0, -2.0, 13, 16, 1148846080, 0)
-							NetworkStartSynchronisedScene(scene)
+								idleVar = "idle_cardgames"
 
-							repeat Wait(0) until IsEntityPlayingAnim(PlayerPedId(), "anim_casino_b@amb@casino@games@shared@player@", "idle_cardgames", 3) == 1
+								scene = NetworkCreateSynchronisedScene(coords, rot, 2, true, true, 1065353216, 0, 1065353216)
+								NetworkAddPedToSynchronisedScene(PlayerPedId(), scene, "anim_casino_b@amb@casino@games@shared@player@", "idle_cardgames", 2.0, -2.0, 13, 16, 1148846080, 0)
+								NetworkStartSynchronisedScene(scene)
 
-							g_seat = i
-	
-							leavingBlackjack = false
+								repeat Wait(0) until IsEntityPlayingAnim(PlayerPedId(), "anim_casino_b@amb@casino@games@shared@player@", "idle_cardgames", 3) == 1
 
-							TriggerServerEvent("BLACKJACK:PlayerSatDown", i, closestChair)
+								g_seat = i
+		
+								leavingBlackjack = false
 
-							local endTime = GetGameTimer() + math.floor(GetAnimDuration("anim_casino_b@amb@casino@games@shared@player@", idleVar)*990)
+								TriggerServerEvent("BLACKJACK:PlayerSatDown", i, closestChair)
 
-							while true do
-								Wait(0)
-								if GetGameTimer() >= endTime then
-									if playerBusy == true then
-										while playerBusy == true do
-											Wait(0)
+								local endTime = GetGameTimer() + math.floor(GetAnimDuration("anim_casino_b@amb@casino@games@shared@player@", idleVar)*990)
 
-											local playerPed = PlayerPedId()
+								while true do
+									Wait(0)
+									if GetGameTimer() >= endTime then
+										if playerBusy == true then
+											while playerBusy == true do
+												Wait(0)
 
-											if IsEntityDead(playerPed) then
-												TriggerServerEvent("BLACKJACK:PlayerRemove", i)
-												ClearPedTasks(playerPed)
-												leaveBlackjack()
-												break
-											elseif leaveCheckCallback ~= nil then
-												if leaveCheckCallback() then
+												local playerPed = PlayerPedId()
+
+												if IsEntityDead(playerPed) then
 													TriggerServerEvent("BLACKJACK:PlayerRemove", i)
 													ClearPedTasks(playerPed)
 													leaveBlackjack()
-													break									
+													break
+												elseif leaveCheckCallback ~= nil then
+													if leaveCheckCallback() then
+														TriggerServerEvent("BLACKJACK:PlayerRemove", i)
+														ClearPedTasks(playerPed)
+														leaveBlackjack()
+														break									
+													end
 												end
 											end
 										end
+										
+										if leavingBlackjack == false then
+											idleVar = "idle_var_0"..math.random(1,5)
+
+											local scene = NetworkCreateSynchronisedScene(coords, rot, 2, true, true, 1065353216, 0, 1065353216)
+											NetworkAddPedToSynchronisedScene(PlayerPedId(), scene, "anim_casino_b@amb@casino@games@shared@player@", idleVar, 2.0, -2.0, 13, 16, 1148846080, 0)
+											NetworkStartSynchronisedScene(scene)
+											endTime = GetGameTimer() + math.floor(GetAnimDuration("anim_casino_b@amb@casino@games@shared@player@", idleVar)*990)
+											-- DebugPrint("idling again")
+										end
 									end
 									
-									if leavingBlackjack == false then
-										idleVar = "idle_var_0"..math.random(1,5)
+									-- DisplayHelpText("Press ~INPUT_CONTEXT~ to leave Blackjack.")
+									-- if IsControlJustPressed(1, 51) then
+									if leavingBlackjack == true then
+										if standUpCallback ~= nil then
+											standUpCallback()
+										end
 
-										local scene = NetworkCreateSynchronisedScene(coords, rot, 2, true, true, 1065353216, 0, 1065353216)
-										NetworkAddPedToSynchronisedScene(PlayerPedId(), scene, "anim_casino_b@amb@casino@games@shared@player@", idleVar, 2.0, -2.0, 13, 16, 1148846080, 0)
+										local scene = NetworkCreateSynchronisedScene(coords, rot, 2, false, false, 1065353216, 0, 1065353216)
+										NetworkAddPedToSynchronisedScene(PlayerPedId(), scene, "anim_casino_b@amb@casino@games@shared@player@", "sit_exit_left", 2.0, -2.0, 13, 16, 1148846080, 0)
 										NetworkStartSynchronisedScene(scene)
-										endTime = GetGameTimer() + math.floor(GetAnimDuration("anim_casino_b@amb@casino@games@shared@player@", idleVar)*990)
-										-- DebugPrint("idling again")
-									end
-								end
-								
-								-- DisplayHelpText("Press ~INPUT_CONTEXT~ to leave Blackjack.")
-								-- if IsControlJustPressed(1, 51) then
-								if leavingBlackjack == true then
-									if standUpCallback ~= nil then
-										standUpCallback()
-									end
-
-									local scene = NetworkCreateSynchronisedScene(coords, rot, 2, false, false, 1065353216, 0, 1065353216)
-									NetworkAddPedToSynchronisedScene(PlayerPedId(), scene, "anim_casino_b@amb@casino@games@shared@player@", "sit_exit_left", 2.0, -2.0, 13, 16, 1148846080, 0)
-									NetworkStartSynchronisedScene(scene)
-									TriggerServerEvent("BLACKJACK:PlayerSatUp", i)
-									Wait(math.floor(GetAnimDuration("anim_casino_b@amb@casino@games@shared@player@", "sit_exit_left")*800))
-									ClearPedTasks(PlayerPedId())
-									break
-								else
-									local playerPed = PlayerPedId()
-
-									if IsEntityDead(playerPed) then
-										TriggerServerEvent("BLACKJACK:PlayerRemove", i)
-										ClearPedTasks(playerPed)
-										leaveBlackjack()
+										TriggerServerEvent("BLACKJACK:PlayerSatUp", i)
+										Wait(math.floor(GetAnimDuration("anim_casino_b@amb@casino@games@shared@player@", "sit_exit_left")*800))
+										ClearPedTasks(PlayerPedId())
 										break
-									elseif leaveCheckCallback ~= nil then
-										if leaveCheckCallback() then
+									else
+										local playerPed = PlayerPedId()
+
+										if IsEntityDead(playerPed) then
 											TriggerServerEvent("BLACKJACK:PlayerRemove", i)
 											ClearPedTasks(playerPed)
 											leaveBlackjack()
-											break									
+											if standUpCallback ~= nil then
+												standUpCallback()
+											end
+											break
+										elseif leaveCheckCallback ~= nil then
+											if leaveCheckCallback() then
+												TriggerServerEvent("BLACKJACK:PlayerRemove", i)
+												ClearPedTasks(playerPed)
+												leaveBlackjack()
+												if standUpCallback ~= nil then
+													standUpCallback()
+												end
+												break									
+											end
 										end
 									end
-								end
 
-								-- if IsEntityPlayingAnim(PlayerPedId(), "anim_casino_b@amb@casino@games@shared@player@", idleVar, 3) ~= 1 then break end
+									-- if IsEntityPlayingAnim(PlayerPedId(), "anim_casino_b@amb@casino@games@shared@player@", idleVar, 3) ~= 1 then break end
+								end
 							end
 						end
 					end
 				end
 			end
-		end		
+		end	
 	end
 end
 
