@@ -699,6 +699,9 @@ end)
 
 RegisterNetEvent("BLACKJACK:BetReceived")
 
+local upPressed = false
+local downPressed = false
+
 RegisterNetEvent("BLACKJACK:RequestBets")
 AddEventHandler("BLACKJACK:RequestBets", function(index, _timeLeft)
 	timeLeft = _timeLeft
@@ -709,51 +712,51 @@ AddEventHandler("BLACKJACK:RequestBets", function(index, _timeLeft)
 		renderScaleform = true
 		renderTime = true
 		renderBet = true
+
+		PushScaleformMovieFunction(scaleform, "CLEAR_ALL")
+		PopScaleformMovieFunctionVoid()
+
+		BeginScaleformMovieMethod(scaleform, "SET_BACKGROUND_COLOUR")
+		ScaleformMovieMethodAddParamInt(0)
+		ScaleformMovieMethodAddParamInt(0)
+		ScaleformMovieMethodAddParamInt(0)
+		ScaleformMovieMethodAddParamInt(80)
+		EndScaleformMovieMethod()
+		
+		BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
+		ScaleformMovieMethodAddParamInt(0)
+		ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(1, 202, 0))
+		ScaleformMovieMethodAddParamPlayerNameString("Exit")
+		EndScaleformMovieMethod()
+
+		BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
+		ScaleformMovieMethodAddParamInt(1)
+		ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(1, 201, 0))
+		ScaleformMovieMethodAddParamPlayerNameString("Place Bet")
+		EndScaleformMovieMethod()
+
+		BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
+		ScaleformMovieMethodAddParamInt(2)
+		ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(1, 204, 0))
+		ScaleformMovieMethodAddParamPlayerNameString("Max Bet")
+		EndScaleformMovieMethod()
+
+		BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
+		ScaleformMovieMethodAddParamInt(3)
+		ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(1, 175, 0))
+		ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(1, 174, 0))
+		ScaleformMovieMethodAddParamPlayerNameString("Adjust Bet")
+		EndScaleformMovieMethod()
+	
+		BeginScaleformMovieMethod(scaleform, "DRAW_INSTRUCTIONAL_BUTTONS")
+		EndScaleformMovieMethod()
+
 		while true do Wait(0)
-			BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
-			ScaleformMovieMethodAddParamInt(0)
-			ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(1, 175, 0))
-			ScaleformMovieMethodAddParamPlayerNameString("")
-			EndScaleformMovieMethod()
-			
-			BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
-			ScaleformMovieMethodAddParamInt(1)
-			ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(1, 174, 0))
-			ScaleformMovieMethodAddParamPlayerNameString("Change Bet")
-			EndScaleformMovieMethod()
-		
-			BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
-			ScaleformMovieMethodAddParamInt(2)
-			ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(1, 201, 0))
-			ScaleformMovieMethodAddParamPlayerNameString("Bet")
-			EndScaleformMovieMethod()
-		
-			BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
-			ScaleformMovieMethodAddParamInt(3)
-			ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(1, 192, 0))
-			ScaleformMovieMethodAddParamPlayerNameString("Max Bet")
-			EndScaleformMovieMethod()
-		
-			BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
-			ScaleformMovieMethodAddParamInt(4)
-			ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(1, 202, 0))
-			ScaleformMovieMethodAddParamPlayerNameString("Quit")
-			EndScaleformMovieMethod()
-			
-			BeginScaleformMovieMethod(scaleform, "DRAW_INSTRUCTIONAL_BUTTONS")
-			EndScaleformMovieMethod()
-			
 			local tableLimit = (tables[scrollerIndex].highStakes == true) and #bettingNums or lowTableLimit
 
-			if IsControlJustPressed(1, 192) then
+			if IsControlJustPressed(1, 204) then -- TAB / Y
 				selectedBet = tableLimit
-			elseif IsControlJustPressed(1, 175) then -- RIGHT
-				selectedBet = selectedBet + 1
-				if selectedBet > tableLimit then selectedBet = 1 end
-			elseif IsControlJustPressed(1, 174) then -- LEFT
-				selectedBet = selectedBet - 1
-				if selectedBet < 1 then selectedBet = tableLimit end
-			elseif IsControlJustPressed(1, 202) then -- QUIT
+			elseif IsControlJustPressed(1, 202) then -- ESC / B
 				leavingBlackjack = true
 				renderScaleform = false
 				renderTime = false
@@ -762,14 +765,50 @@ AddEventHandler("BLACKJACK:RequestBets", function(index, _timeLeft)
 				selectedBet = 1
 				return
 			end
-			
+
+			if not upPressed then
+				if IsControlJustPressed(1, 175) then -- RIGHT ARROW / DPAD RIGHT
+					upPressed = true
+					Citizen.CreateThread(function()
+						selectedBet = selectedBet + 1
+						if selectedBet > tableLimit then selectedBet = 1 end
+						Citizen.Wait(175)
+						while IsControlPressed(1, 175) do
+							selectedBet = selectedBet + 1
+							if selectedBet > tableLimit then selectedBet = 1 end
+							Citizen.Wait(125)
+						end
+
+						upPressed = false
+					end)
+				end
+			end
+
+			if not downPressed then
+				if IsControlJustPressed(1, 174) then -- LEFT ARROW / DPAD LEFT
+					downPressed = true
+					Citizen.CreateThread(function()
+						selectedBet = selectedBet - 1
+						if selectedBet < 1 then selectedBet = tableLimit end
+						Citizen.Wait(175)
+						while IsControlPressed(1, 174) do
+							selectedBet = selectedBet - 1
+							if selectedBet < 1 then selectedBet = tableLimit end
+							Citizen.Wait(125)
+						end
+
+						downPressed = false
+					end)
+				end
+			end
+
 			bet = bettingNums[selectedBet] or 10000
 			
 			if #bettingNums < lowTableLimit and tables[scrollerIndex].highStakes == true then
 				bet = bet * 10
 			end
 		
-			if IsControlJustPressed(1, 201) then
+			if IsControlJustPressed(1, 201) then -- ENTER / A
 				
 				TriggerServerEvent("BLACKJACK:CheckPlayerBet", g_seat, bet)
 
@@ -866,55 +905,55 @@ AddEventHandler("BLACKJACK:RequestMove", function(_timeLeft)
 		renderScaleform = true
 		renderTime = true
 		renderHand = true
-		while true do Wait(0)
+
+		BeginScaleformMovieMethod(scaleform, "CLEAR_ALL")
+		EndScaleformMovieMethod()
+
+		BeginScaleformMovieMethod(scaleform, "SET_BACKGROUND_COLOUR")
+		ScaleformMovieMethodAddParamInt(0)
+		ScaleformMovieMethodAddParamInt(0)
+		ScaleformMovieMethodAddParamInt(0)
+		ScaleformMovieMethodAddParamInt(80)
+		EndScaleformMovieMethod()
 		
-			BeginScaleformMovieMethod(scaleform, "CLEAR_ALL")
-			EndScaleformMovieMethod()
+		-- BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
+		-- ScaleformMovieMethodAddParamInt(0)
+		-- ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(1, 51, 0))
+		-- ScaleformMovieMethodAddParamPlayerNameString("Quit")
+		-- EndScaleformMovieMethod()
 
-			BeginScaleformMovieMethod(scaleform, "SET_BACKGROUND_COLOUR")
-			ScaleformMovieMethodAddParamInt(0)
-			ScaleformMovieMethodAddParamInt(0)
-			ScaleformMovieMethodAddParamInt(0)
-			ScaleformMovieMethodAddParamInt(80)
-			EndScaleformMovieMethod()
-			
-			-- BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
-			-- ScaleformMovieMethodAddParamInt(0)
-			-- ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(1, 51, 0))
-			-- ScaleformMovieMethodAddParamPlayerNameString("Quit")
-			-- EndScaleformMovieMethod()
+		BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
+		ScaleformMovieMethodAddParamInt(1)
+		ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(1, 201, 0))
+		ScaleformMovieMethodAddParamPlayerNameString("Hit")
+		EndScaleformMovieMethod()
 
-			BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
-			ScaleformMovieMethodAddParamInt(1)
-			ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(1, 201, 0))
-			ScaleformMovieMethodAddParamPlayerNameString("Hit")
-			EndScaleformMovieMethod()
-
-			BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
-			ScaleformMovieMethodAddParamInt(2)
-			ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(1, 203, 0))
-			ScaleformMovieMethodAddParamPlayerNameString("Stand")
-			EndScaleformMovieMethod()
-			
-			if #hand < 3 then
-				BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
-				ScaleformMovieMethodAddParamInt(3)
-				ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(1, 192, 0))
-				ScaleformMovieMethodAddParamPlayerNameString("Double Down")
-				EndScaleformMovieMethod()
-			end
-
-			if CanSplitHand(hand) == true then
-				BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
-				ScaleformMovieMethodAddParamInt(4)
-				ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(1, 209, 0))
-				ScaleformMovieMethodAddParamPlayerNameString("Split")
-				EndScaleformMovieMethod()
-			end
-			
-			BeginScaleformMovieMethod(scaleform, "DRAW_INSTRUCTIONAL_BUTTONS")
-			EndScaleformMovieMethod()
+		BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
+		ScaleformMovieMethodAddParamInt(2)
+		ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(1, 203, 0))
+		ScaleformMovieMethodAddParamPlayerNameString("Stand")
+		EndScaleformMovieMethod()
 		
+		if #hand < 3 then
+			BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
+			ScaleformMovieMethodAddParamInt(3)
+			ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(1, 192, 0))
+			ScaleformMovieMethodAddParamPlayerNameString("Double Down")
+			EndScaleformMovieMethod()
+		end
+
+		if CanSplitHand(hand) == true then
+			BeginScaleformMovieMethod(scaleform, "SET_DATA_SLOT")
+			ScaleformMovieMethodAddParamInt(4)
+			ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(1, 209, 0))
+			ScaleformMovieMethodAddParamPlayerNameString("Split")
+			EndScaleformMovieMethod()
+		end
+		
+		BeginScaleformMovieMethod(scaleform, "DRAW_INSTRUCTIONAL_BUTTONS")
+		EndScaleformMovieMethod()
+		
+		while true do Wait(0)	
 			if IsControlJustPressed(1, 201) then
 				if leavingBlackjack == true then DebugPrint("returning") return end
 				
@@ -1365,6 +1404,27 @@ function ProcessTables()
 								TriggerServerEvent("BLACKJACK:PlayerSatDown", i, closestChair)
 
 								local endTime = GetGameTimer() + math.floor(GetAnimDuration("anim_casino_b@amb@casino@games@shared@player@", idleVar)*990)
+
+								Citizen.CreateThread(function() -- Disable pause when while in-blackjack
+									local startCount = false
+									local count = 0
+									while true do
+										Citizen.Wait(0)
+										SetPauseMenuActive(false)
+
+										if leavingBlackjack == true then
+											startCount = true
+										end
+
+										if startCount == true then
+											count = count + 1
+										end
+
+										if count > 3000 then -- Make it so it enables 3 seconds after hitting the leave button so the pause menu doesn't show up when trying to leave
+											break
+										end
+									end
+								end)
 
 								while true do
 									Wait(0)
