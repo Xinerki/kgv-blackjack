@@ -699,6 +699,9 @@ end)
 
 RegisterNetEvent("BLACKJACK:BetReceived")
 
+local upPressed = false
+local downPressed = false
+
 RegisterNetEvent("BLACKJACK:RequestBets")
 AddEventHandler("BLACKJACK:RequestBets", function(index, _timeLeft)
 	timeLeft = _timeLeft
@@ -751,15 +754,9 @@ AddEventHandler("BLACKJACK:RequestBets", function(index, _timeLeft)
 		while true do Wait(0)
 			local tableLimit = (tables[scrollerIndex].highStakes == true) and #bettingNums or lowTableLimit
 
-			if IsControlJustPressed(1, 192) then
+			if IsControlJustPressed(1, 204) then -- TAB / Y
 				selectedBet = tableLimit
-			elseif IsControlJustPressed(1, 175) then -- RIGHT
-				selectedBet = selectedBet + 1
-				if selectedBet > tableLimit then selectedBet = 1 end
-			elseif IsControlJustPressed(1, 174) then -- LEFT
-				selectedBet = selectedBet - 1
-				if selectedBet < 1 then selectedBet = tableLimit end
-			elseif IsControlJustPressed(1, 202) then -- QUIT
+			elseif IsControlJustPressed(1, 202) then -- ESC / B
 				leavingBlackjack = true
 				renderScaleform = false
 				renderTime = false
@@ -768,14 +765,50 @@ AddEventHandler("BLACKJACK:RequestBets", function(index, _timeLeft)
 				selectedBet = 1
 				return
 			end
-			
+
+			if not upPressed then
+				if IsControlJustPressed(1, 175) then -- RIGHT ARROW / DPAD RIGHT
+					upPressed = true
+					Citizen.CreateThread(function()
+						selectedBet = selectedBet + 1
+						if selectedBet > tableLimit then selectedBet = 1 end
+						Citizen.Wait(175)
+						while IsControlPressed(1, 175) do
+							selectedBet = selectedBet + 1
+							if selectedBet > tableLimit then selectedBet = 1 end
+							Citizen.Wait(125)
+						end
+
+						upPressed = false
+					end)
+				end
+			end
+
+			if not downPressed then
+				if IsControlJustPressed(1, 174) then -- LEFT ARROW / DPAD LEFT
+					downPressed = true
+					Citizen.CreateThread(function()
+						selectedBet = selectedBet - 1
+						if selectedBet < 1 then selectedBet = tableLimit end
+						Citizen.Wait(175)
+						while IsControlPressed(1, 174) do
+							selectedBet = selectedBet - 1
+							if selectedBet < 1 then selectedBet = tableLimit end
+							Citizen.Wait(125)
+						end
+
+						downPressed = false
+					end)
+				end
+			end
+
 			bet = bettingNums[selectedBet] or 10000
 			
 			if #bettingNums < lowTableLimit and tables[scrollerIndex].highStakes == true then
 				bet = bet * 10
 			end
 		
-			if IsControlJustPressed(1, 201) then
+			if IsControlJustPressed(1, 201) then -- ENTER / A
 				
 				TriggerServerEvent("BLACKJACK:CheckPlayerBet", g_seat, bet)
 
