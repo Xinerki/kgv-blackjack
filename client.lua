@@ -180,6 +180,8 @@ function leaveBlackjack()
 	renderBet = false 
 	renderHand = false
 	selectedBet = 1
+	hand = {}
+	splitHand = {}
 end
 
 function s2m(s)
