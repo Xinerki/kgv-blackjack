@@ -1102,9 +1102,9 @@ RegisterNetEvent("BLACKJACK:GameEndReaction")
 AddEventHandler("BLACKJACK:GameEndReaction", function(result)
 	Citizen.CreateThread(function()
 		
-		if handValue(hand) < 21 and result == "good" then
+		if handValue(hand) == 21 and result == "good" then
 			DisplayHelpText("You have Blackjack!", 5000)
-		elseif handValue(hand) > 21 and result ~= good then
+		elseif handValue(hand) > 21 and result ~= "good" then
 			DisplayHelpText("You went bust.", 5000)
 		else
 			DisplayHelpText("You "..resultNames[result].." with "..handValue(hand)..".", 5000)
