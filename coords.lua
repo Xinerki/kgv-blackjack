@@ -51,6 +51,12 @@ for i,v in pairs(customTables) do
 	table.insert(tables, v)
 end
 
+resultNames = {
+	["good"] = "won",
+	["bad"] = "lost", 
+	["impartial"] = "got a push",
+}
+
 requestCardAnims = {
 	"request_card",
 	"request_card_alt1",
@@ -481,6 +487,52 @@ bettingNums = {
 	40000,
 	45000,
 	50000, -- 40 Low table limit, betting numbers added after this will be high stakes only
+	55000,
+	60000,
+	65000,
+	70000,
+	75000,
+	80000,
+	85000,
+	90000,
+	95000,
+	100000,
+	150000,
+	200000,
+	250000,
+	300000,
+	350000,
+	400000,
+	450000,
+	500000,
+	550000,
+	600000,
+	650000,
+	700000,
+	750000,
+	800000,
+	850000,
+	900000,
+	950000,
+	1000000,
+	1500000,
+	2000000,
+	2500000,
+	3000000,
+	3500000,
+	4000000,
+	4500000,
+	5000000,
+	5500000,
+	6000000,
+	6500000,
+	7000000,
+	7500000,
+	8000000,
+	8500000,
+	9000000,
+	9500000,
+	10000000,
 }
 
 bettingTime = 50
