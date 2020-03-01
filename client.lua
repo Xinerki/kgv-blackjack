@@ -1405,6 +1405,27 @@ function ProcessTables()
 
 								local endTime = GetGameTimer() + math.floor(GetAnimDuration("anim_casino_b@amb@casino@games@shared@player@", idleVar)*990)
 
+								Citizen.CreateThread(function() -- Disable pause when while in-blackjack
+									local startCount = false
+									local count = 0
+									while true do
+										Citizen.Wait(0)
+										SetPauseMenuActive(false)
+
+										if leavingBlackjack == true then
+											startCount = true
+										end
+
+										if startCount == true then
+											count = count + 1
+										end
+
+										if count > 3000 then -- Make it so it enables 3 seconds after hitting the leave button so the pause menu doesn't show up when trying to leave
+											break
+										end
+									end
+								end)
+
 								while true do
 									Wait(0)
 									if GetGameTimer() >= endTime then
