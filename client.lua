@@ -52,6 +52,14 @@ function SetCanSitDownCallback(cb)
 	canSitDownCallback = cb
 end
 
+function Notification(text, color, blink)
+	if color then ThefeedNextPostBackgroundColor(color) end
+	PlaySoundFrontend(-1, "OTHER_TEXT", "HUD_AWARDS", 0)
+	BeginTextCommandThefeedPost("STRING")
+	AddTextComponentSubstringPlayerName(text)
+	EndTextCommandThefeedPostTicker(blink or false, false)
+end
+
 function DisplayHelpText(helpText, time)
 	BeginTextCommandDisplayHelp("STRING")
 	AddTextComponentSubstringWebsite(helpText)
@@ -379,8 +387,8 @@ end
 dealerHand = {}
 dealerHandObjs = {}
 handObjs = {}
-		
-Citizen.CreateThread(function()
+
+function CreatePeds()
 	if not HasAnimDictLoaded("anim_casino_b@amb@casino@games@blackjack@dealer") then
 		RequestAnimDict("anim_casino_b@amb@casino@games@blackjack@dealer")
 		repeat Wait(0) until HasAnimDictLoaded("anim_casino_b@amb@casino@games@blackjack@dealer")
@@ -397,7 +405,6 @@ Citizen.CreateThread(function()
 	end
 	
 	for i,v in pairs(customTables) do
-		
 		local model = `vw_prop_casino_blckjack_01`
 		if v.highStakes == true then
 			model = `vw_prop_casino_blckjack_01b`
@@ -481,7 +488,7 @@ Citizen.CreateThread(function()
 		
 		spawnedPeds[i] = dealer
 	end
-end)
+end
 
 -- function getCardOffset(seat, cardIndex)
 	-- if seat == 1 then
@@ -1511,7 +1518,16 @@ function ProcessTables()
 	end
 end
 
-Citizen.CreateThread(ProcessTables)
+Citizen.CreateThread(function()
+
+	if IsModelInCdimage(`vw_prop_casino_blckjack_01`) and IsModelInCdimage(`s_f_y_casino_01`) and IsModelInCdimage(`vw_prop_chip_10dollar_x1`) then
+		Citizen.CreateThread(ProcessTables)
+		Citizen.CreateThread(CreatePeds)
+	else
+		ThefeedSetAnimpostfxColor(255, 0, 0, 255)
+		Notification("This server is missing objects required for KGV-Blackjack!", nil, true)
+	end
+end)
 
 exports("SetSatDownCallback", SetSatDownCallback)
 exports("SetStandUpCallback", SetStandUpCallback)
