@@ -1220,7 +1220,7 @@ AddEventHandler("BLACKJACK:GiveCard", function(i, seat, handSize, card, flipped,
 	flipped = flipped or false
 	split = split or false
 	
-	if seat == closestChair then
+	if i == g_seat and seat == closestChair then
 		if split == true then
 			table.insert(splitHand, card)
 		else
