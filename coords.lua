@@ -1,4 +1,3 @@
-
 _DEBUG = false
 
 function DebugPrint(str)
@@ -53,7 +52,7 @@ end
 
 resultNames = {
 	["good"] = "won",
-	["bad"] = "lost", 
+	["bad"] = "lost",
 	["impartial"] = "got a push",
 }
 
@@ -78,7 +77,7 @@ cardOffsets = {
 		vector3(0.524975, 0.30975, 0.9516),
 		vector3(0.515775, 0.325325, 0.95235),
 	},
-	
+
 	[2] = {
 		vector3(0.2325, -0.1082, 0.94805),
 		vector3(0.23645, -0.0918, 0.949),
@@ -88,7 +87,7 @@ cardOffsets = {
 		vector3(0.257575, -0.0256, 0.9532),
 		vector3(0.2601, -0.008175, 0.954375),
 	},
-	
+
 	[3] = {
 		vector3(-0.2359, -0.1091, 0.9483),
 		vector3(-0.221025, -0.100675, 0.949),
@@ -98,7 +97,7 @@ cardOffsets = {
 		vector3(-0.165, -0.060025, 0.951825),
 		vector3(-0.14895, -0.05155, 0.95255),
 	},
-	
+
 	[4] = {
 		vector3(-0.5765, 0.2229, 0.9482),
 		vector3(-0.558925, 0.2197, 0.949175),
@@ -120,7 +119,7 @@ cardRotationOffsets = {
 		67.88,
 		69.56,
 	},
-	
+
 	[2] = {
 		22.11,
 		22.32,
@@ -130,7 +129,7 @@ cardRotationOffsets = {
 		26.28,
 		22.68,
 	},
-	
+
 	[3] = {
 		-21.43,
 		-20.16,
@@ -140,7 +139,7 @@ cardRotationOffsets = {
 		-23.76,
 		-19.44,
 	},
-	
+
 	[4] = {
 		-67.03,
 		-69.12,
@@ -163,7 +162,7 @@ cardSplitOffsets = {
 		vector3(0.5614, 0.4237, 0.951775),
 		vector3(0.554325, 0.4402, 0.952525),
 	},
-	
+
 	[2] = {
 		vector3(0.3431, -0.0527, 0.94855),
 		vector3(0.348575, -0.0348, 0.949425),
@@ -173,7 +172,7 @@ cardSplitOffsets = {
 		vector3(0.368525, 0.032475, 0.95335),
 		vector3(0.373275, 0.0506, 0.9543),
 	},
-	
+
 	[3] = {
 		vector3(-0.116, -0.1501, 0.947875),
 		vector3(-0.102725, -0.13795, 0.948525),
@@ -183,7 +182,7 @@ cardSplitOffsets = {
 		vector3(-0.046275, -0.095025, 0.9516),
 		vector3(-0.031425, -0.0846, 0.952675),
 	},
-	
+
 	[4] = {
 		vector3(-0.5205, 0.1122, 0.9478),
 		vector3(-0.503175, 0.108525, 0.94865),
@@ -205,7 +204,7 @@ cardSplitRotationOffsets = {
 	 	65.96,
 	 	67.76,
 	},
-	
+
 	[2] = {
 		22.11,
 		22.0,
@@ -215,7 +214,7 @@ cardSplitRotationOffsets = {
 		26.16,
 		28.76,
 	},
-	
+
 	[3] = {
 		-14.04,
 		-15.48,
@@ -225,7 +224,7 @@ cardSplitRotationOffsets = {
 		-14.4,
 		-14.28,
 	},
-	
+
 	[4] = {
 		-67.03,
 		-67.6,
@@ -271,21 +270,21 @@ chipSplitOffsets = {
 		vector3(0.7374, 0.349625, 0.0),
 		vector3(0.76415, 0.419225, 0.0),
 	},
-	
+
 	[2] = {
 		vector3(0.2827, -0.227825, 0.0),
 		vector3(0.3605, -0.1898, 0.0),
 		vector3(0.4309, -0.16365, 0.0),
 		vector3(0.49275, -0.111575, 0.0),
 	},
-	
+
 	[3] = {
 		vector3(-0.279425, -0.2238, 0.0),
 		vector3(-0.200775, -0.25855, 0.0),
 		vector3(-0.125775, -0.26815, 0.0),
 		vector3(-0.05615, -0.29435, 0.0),
 	},
-	
+
 	[4] = {
 		vector3(-0.685925, 0.173275, 0.0),
 		vector3(-0.6568, 0.092525, 0.0),
@@ -302,21 +301,21 @@ chipSplitRotationOffsets = { -- doesnt have to be vector3
 		vector3(0, 0, -10.8),
 		vector3(0, 0, -9.72),
 	},
-	
+
 	[2] = {
 		vector3(0, 0, -69.12),
 		vector3(0, 0, -64.8),
 		vector3(0, 0, -58.68),
 		vector3(0, 0, -51.12),
 	},
-	
+
 	[3] = {
 		vector3(0, 0, -112.32),
 		vector3(0, 0, -108.36),
 		vector3(0, 0, -99.72),
 		vector3(0, 0, -102.6),
 	},
-	
+
 	[4] = {
 		vector3(0, 0, -155.88),
 		vector3(0, 0, -151.92),
@@ -332,21 +331,21 @@ chipOffsets = {
 		vector3(0.756775, 0.292775, 0.0),
 		vector3(0.701875, 0.3439, 0.0),
 	},
-	
+
 	[2] = {
 		vector3(0.278125, -0.2571, 0.0),
 		vector3(0.280375, -0.190375, 0.0),
 		vector3(0.397775, -0.208525, 0.0),
 		vector3(0.39715, -0.1354, 0.0),
 	},
-	
+
 	[3] = {
 		vector3(-0.30305, -0.2464, 0.0),
 		vector3(-0.257975, -0.19715, 0.0),
 		vector3(-0.186575, -0.2861, 0.0),
 		vector3(-0.141675, -0.237925, 0.0),
 	},
-	
+
 	[4] = {
 		vector3(-0.72855, 0.17345, 0.0),
 		vector3(-0.652825, 0.177525, 0.0),
@@ -362,21 +361,21 @@ pileOffsets = {
 		vector3(0.756775, 0.292775, 0.0),
 		vector3(0.701875, 0.3439, 0.0),
 	},
-	
+
 	[2] = {
 		vector3(0.03, -0.29, 0.0),
 		vector3(0.05, -0.06, 0.0),
 		vector3(0.397775, -0.208525, 0.0),
 		vector3(0.39715, -0.1354, 0.0),
 	},
-	
+
 	[3] = {
 		vector3(-0.48, -0.13, 0.0),
 		vector3(-0.35, 0.07, 0.0),
 		vector3(-0.186575, -0.2861, 0.0),
 		vector3(-0.141675, -0.237925, 0.0),
 	},
-	
+
 	[4] = {
 		vector3(-0.7, 0.32, 0.0),
 		vector3(-0.7, 0.53, 0.0),
@@ -392,21 +391,21 @@ chipRotationOffsets = { -- doesnt have to be vector3
 		vector3(0, 0, 74.52),
 		vector3(0, 0, 72.0),
 	},
-	
+
 	[2] = {
 		vector3(0, 0, 12.96),
 		vector3(0, 0, 29.16),
 		vector3(0, 0, 32.04),
 		vector3(0, 0, 32.04),
 	},
-	
+
 	[3] = {
 		vector3(0, 0, -18.36),
 		vector3(0, 0, -18.72),
 		vector3(0, 0, -15.48),
 		vector3(0, 0, -18.0),
 	},
-	
+
 	[4] = {
 		vector3(0, 0, -79.2),
 		vector3(0, 0, -68.76),
@@ -422,21 +421,21 @@ pileRotationOffsets = { -- doesnt have to be vector3
 		vector3(0, 0, 74.52),
 		vector3(0, 0, 72.0),
 	},
-	
+
 	[2] = {
 		vector3(0, 0, 78.7),
 		vector3(0, 0, 4.6),
 		vector3(0, 0, 32.04),
 		vector3(0, 0, 32.04),
 	},
-	
+
 	[3] = {
 		vector3(0, 0, 44.89),
 		vector3(0, 0, 144.49),
 		vector3(0, 0, -15.48),
 		vector3(0, 0, -18.0),
 	},
-	
+
 	[4] = {
 		vector3(0, 0, 15.6),
 		vector3(0, 0, 15.6),
@@ -609,7 +608,7 @@ chipThickness = {
 	[`vw_prop_chip_5kdollar_x1`] = 0.005538,
 	[`vw_prop_chip_10kdollar_x1`] = 0.005562,
 	[`vw_prop_chip_5kdollar_st`] = 0.061049,
-	[`vw_prop_chip_10kdollar_st`] = 0.06095,	
+	[`vw_prop_chip_10kdollar_st`] = 0.06095,
 	[`vw_prop_plaq_5kdollar_x1`] = 0.006891000084579,
 	[`vw_prop_plaq_10kdollar_x1`] = 0.0057889996096492,
 	[`vw_prop_plaq_5kdollar_st`] = 0.060949999839067,
@@ -661,9 +660,9 @@ chipHeights = { -- whatever the fuck this even means
 
 function SetDealerOutfit(ped, outfit)
 	local outfit = (outfit % 13) or math.random(0, 13)
-	
+
 	SetPedDefaultComponentVariation(ped)
-	
+
 	if outfit == 0 then
 		SetPedComponentVariation(ped, 0, 3, 0, 0)
 		SetPedComponentVariation(ped, 1, 1, 0, 0)
