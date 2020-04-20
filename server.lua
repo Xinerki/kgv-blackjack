@@ -1,13 +1,18 @@
-
-
 ranks = {'02', '03', '04', '05', '06', '07', '08', '09', '10', --[['11',]] 'JACK', 'QUEEN', 'KING', 'ACE'}
 suits = {'SPD', 'HRT', 'DIA', 'CLUB'}
 
 function shuffle(tbl)
-  for i = #tbl, 2, -1 do
-    local j = math.random(i)
-    tbl[i], tbl[j] = tbl[j], tbl[i]
-  end
+	for i = #tbl, 2, -1 do
+		local j = math.random(i)
+		tbl[i], tbl[j] = tbl[j], tbl[i]
+	end
+
+	--[[
+	for i = 1, #tbl, 1 do
+		DebugPrint(tbl[i])
+	end
+	]]--
+
   return tbl
 end
 
@@ -22,7 +27,10 @@ function getDeck()
 end
 
 function takeCard(tDeck)
-	return table.remove(tDeck, math.random(1,#tDeck))
+	--local card_pick = math.random(1,#tDeck)
+	--DebugPrint(card_pick)
+
+	return table.remove(tDeck, 1)
 end
 
 function cardValue(card)
@@ -35,22 +43,22 @@ function cardValue(card)
 	if string.find(card, 'ACE') then
 		rank = 11
 	end
-	
+
 	return rank
 end
 
 function handValue(hand)
 	local tmpValue = 0
 	local numAces = 0
-	
+
 	for i,v in pairs(hand) do
 		tmpValue = tmpValue + cardValue(v)
 	end
-	
+
 	for i,v in pairs(hand) do
 		if string.find(v, 'ACE') then numAces = numAces + 1 end
 	end
-	
+
 	repeat
 		if tmpValue > 21 and numAces > 0 then
 			tmpValue = tmpValue - 10
@@ -59,10 +67,10 @@ function handValue(hand)
 			break
 		end
 	until numAces == 0
-	
+
 	return tmpValue
 end
-		
+
 players = {
 	-- [1] = { -- table
 		-- [1] = { -- player
@@ -141,7 +149,7 @@ end
 
 function HaveAllPlayersBetted(table)
 	for i,v in pairs(table) do
-		if v.bet < 1 then 
+		if v.bet < 1 then
 			return false
 		end
 	end
@@ -176,9 +184,9 @@ function SetPlayerBet(i, seat, bet, betId, double, split)
 		if double == false and split == false then
 			TakeMoney(source, bet)
 
-			players[i][num].bet = tonumber(bet)			
+			players[i][num].bet = tonumber(bet)
 		end
-		
+
 		TriggerClientEvent("BLACKJACK:PlaceBetChip", -1, i, 5-seat, bet, double, split)
 	else
 		DebugPrint("TABLE "..i..": PLAYER "..source.." ATTEMPTED BET BUT NO LONGER TRACKED?")
@@ -220,29 +228,29 @@ function StartTableThread(i)
 		while true do Wait(0)
 			if players[index] and #players[index] ~= 0 then
 				DebugPrint("WAITING FOR ALL PLAYERS AT TABLE "..index.." TO PLACE THEIR BETS.")
-				
+
 				-- TODO: DONT FORGET TO REMOVE THIS JESUS CHRIST
-				
+
 				-- local bet = 15000
-				
+
 				-- TakeMoney(players[index][1].player, bet)
 				-- players[index][1].bet = bet
-				
+
 				-- for num,_ in pairs(players[index]) do
 					-- TriggerClientEvent("BLACKJACK:RequestBets", players[index][num].player)
 				-- end
-				
+
 				PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_place_bet_request")
 				PlayDealerSpeech(index, "MINIGAME_DEALER_PLACE_CHIPS")
-				
-				repeat 
+
+				repeat
 					for i,v in pairs(players[index]) do
 						TriggerClientEvent("BLACKJACK:SyncTimer", v.player, bettingTime - timeTracker[index])
-					end -- Remove players from round who didn't bet in time		
+					end -- Remove players from round who didn't bet in time
 					Wait(1000)
-					timeTracker[index] = timeTracker[index] + 1					
+					timeTracker[index] = timeTracker[index] + 1
 				until HaveAllPlayersBetted(players[index]) or #players[index] == 0 or timeTracker[index] >= bettingTime
-				
+
 				if #players[index] == 0 then
 					DebugPrint("BETTING ENDED AT TABLE "..index..", NO MORE PLAYERS")
 					-- break
@@ -255,48 +263,48 @@ function StartTableThread(i)
 
 					if ArePlayersStillIn(players[index]) then -- did everyone just not bet?
 						DebugPrint("BETS PLACED AT TABLE "..index..", STARTING GAME")
-		
+
 						PlayDealerSpeech(index, "MINIGAME_DEALER_CLOSED_BETS")
-						
+
 						local currentPlayers = {table.unpack(players[i])}
 						local deck = getDeck()
 						local dealerHand = {}
-						
+
 						local gameRunning = true
-						
+
 						Wait(1500)
-						
+
 						for x=1,2 do
 							local card = takeCard(deck)
 							table.insert(dealerHand, card)
-							
+
 							TriggerClientEvent("BLACKJACK:GiveCard", -1, index, 0, #dealerHand, card, #dealerHand == 1)
-							
+
 							if #dealerHand == 1 then
 								PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_deal_card_self")
-								DebugPrint("TABLE "..index..": DEALT DEALER [HIDDEN]")
+								DebugPrint("TABLE "..index..": DEALT DEALER [HIDDEN] ") -- ..card) -- Add this to see the Dealer's hidden card
 							else
 								PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_deal_card_self_second_card")
 								DebugPrint("TABLE "..index..": DEALT DEALER "..card)
 							end
 							Wait(2000)
-		
+
 							if #dealerHand > 1 then
 								PlayDealerSpeech(index, "MINIGAME_BJACK_DEALER_"..cardValue(dealerHand[2]))
 							end
-							
+
 							for i,v in pairs(currentPlayers) do
 								if v.player_in then
 									local card = takeCard(deck)
 									TriggerClientEvent("BLACKJACK:GiveCard", -1, index, v.seat, #v.hand+1, card)
 									PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_deal_card_player_0" .. 5-v.seat)
 									table.insert(v.hand, card)
-									
+
 									Wait(2000)
-								
-									
+
+
 									DebugPrint("TABLE "..index..": DEALT "..GetPlayerName(v.player):upper().." "..card)
-									
+
 									if handValue(v.hand) == 21 then
 										TriggerClientEvent("BLACKJACK:GameEndReaction", v.player, "good")
 										DebugPrint("TABLE "..index..": "..GetPlayerName(v.player):upper().." HAS BLACKJACK")
@@ -309,9 +317,9 @@ function StartTableThread(i)
 								end
 							end
 						end
-						
+
 						-- female_dealer_focus_player_01_idle
-						
+
 						if handValue(dealerHand) == 21 then
 							DebugPrint("TABLE "..index..": DEALER HAS BLACKJACK")
 							PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_check_and_turn_card")
@@ -329,7 +337,7 @@ function StartTableThread(i)
 							PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_check_card")
 							Wait(2000)
 						end
-						
+
 						if gameRunning == true then
 							for i,v in pairs(currentPlayers) do
 								if v.player_in then
@@ -358,13 +366,13 @@ function StartTableThread(i)
 											while receivedMove == false and tableTracker[tostring(v.player)] ~= nil and timeTracker[index] < moveTime do
 												for i,v in pairs(currentPlayers) do
 													TriggerClientEvent("BLACKJACK:SyncTimer", v.player, moveTime - timeTracker[index])
-												end	
+												end
 												Wait(1000)
-												timeTracker[index] = timeTracker[index] + 1												
+												timeTracker[index] = timeTracker[index] + 1
 											end
 											--repeat Wait(0) until receivedMove == true
 											RemoveEventHandler(eventHandler)
-											
+
 											if tableTracker[tostring(v.player)] == nil then
 												DebugPrint("TABLE "..index..": "..v.player.." WAS PUT OUT DUE TO LEAVING")
 												v.player_in = false
@@ -379,7 +387,7 @@ function StartTableThread(i)
 													table.insert(v.hand, card)
 													Wait(1500)
 													DebugPrint("TABLE "..index..": DEALT "..GetPlayerName(v.player):upper().." "..card)
-													
+
 													if handValue(v.hand) == 21 then
 														-- PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_outro")
 														-- Wait(1500)
@@ -401,9 +409,9 @@ function StartTableThread(i)
 												elseif move == "double" then
 													TakeMoney(v.player, v.bet)
 													v.bet = v.bet*2
-													
+
 													-- TriggerClientEvent("BLACKJACK:PlaceBetChip", -1, i, 5-v.seat, betId)
-													
+
 													local card = takeCard(deck)
 													TriggerClientEvent("BLACKJACK:GiveCard", -1, index, v.seat, #v.hand+1, card)
 													-- PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_outro")
@@ -412,7 +420,7 @@ function StartTableThread(i)
 													table.insert(v.hand, card)
 													Wait(1500)
 													DebugPrint("TABLE "..index..": DEALT "..GetPlayerName(v.player):upper().." "..card)
-													
+
 													if handValue(v.hand) == 21 then
 														-- PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_outro")
 														-- Wait(1500)
@@ -431,39 +439,39 @@ function StartTableThread(i)
 														-- Wait(2000)
 														PlayDealerSpeech(index, "MINIGAME_BJACK_DEALER_"..handValue(v.hand))
 													end
-													
+
 													break
 												elseif move == "split" then
 													TakeMoney(v.player, v.bet)
 													v.bet = v.bet*2
-													
+
 													-- TriggerClientEvent("BLACKJACK:PlaceBetChip", -1, i, 5-v.seat, betId)
-													
+
 													PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_split_card_player_0" .. 5-v.seat)
-													
+
 													v.splitHand = {}
-													
+
 													local splitCard = table.remove(v.hand, 2)
 													table.insert(v.splitHand, splitCard)
-													
+
 													Wait(500)
-													
+
 													TriggerClientEvent("BLACKJACK:SplitHand", -1, index, v.seat, #v.splitHand, v.hand, v.splitHand)
-													
+
 													Wait(1000)
-													
+
 													local card = takeCard(deck)
 													TriggerClientEvent("BLACKJACK:GiveCard", -1, index, v.seat, #v.hand+1, card, false, false)
 													-- PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_outro")
 													-- Wait(1500)
 													PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_hit_card_player_0" .. 5-v.seat)
-													
+
 													-- female_dealer_focus_player_01_idle_split
-													
+
 													table.insert(v.hand, card)
 													Wait(1500)
 													DebugPrint("TABLE "..index..": DEALT "..GetPlayerName(v.player):upper().." "..card)
-													
+
 													if handValue(v.hand) == 21 then
 														-- PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_outro")
 														-- Wait(1500)
@@ -482,17 +490,17 @@ function StartTableThread(i)
 														-- Wait(2000)
 														PlayDealerSpeech(index, "MINIGAME_BJACK_DEALER_"..handValue(v.hand))
 													end
-													
+
 													local card = takeCard(deck)
 													TriggerClientEvent("BLACKJACK:GiveCard", -1, index, v.seat, #v.splitHand+1, card, false, true)
 													-- PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_outro")
 													-- Wait(1500)
 													PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_hit_second_card_player_0" .. 5-v.seat)
-													
+
 													table.insert(v.splitHand, card)
 													Wait(1500)
 													DebugPrint("TABLE "..index..": DEALT "..GetPlayerName(v.player):upper().." "..card)
-													
+
 													if handValue(v.splitHand) == 21 then
 														-- PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_outro")
 														-- Wait(1500)
@@ -511,7 +519,7 @@ function StartTableThread(i)
 														-- Wait(2000)
 														PlayDealerSpeech(index, "MINIGAME_BJACK_DEALER_"..handValue(v.splitHand))
 													end
-												
+
 													-- PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_intro")
 													-- Wait(1500)
 													PlayDealerSpeech(index, "MINIGAME_BJACK_DEALER_ANOTHER_CARD")
@@ -531,14 +539,14 @@ function StartTableThread(i)
 														while receivedMove == false and tableTracker[tostring(v.player)] ~= nil and timeTracker[index] < moveTime do
 															for i,v in pairs(currentPlayers) do
 																TriggerClientEvent("BLACKJACK:SyncTimer", v.player, moveTime - timeTracker[index])
-															end	
+															end
 															Wait(1000)
-															timeTracker[index] = timeTracker[index] + 1															
+															timeTracker[index] = timeTracker[index] + 1
 														end
 
 														--repeat Wait(0) until receivedMove == true
 														RemoveEventHandler(eventHandler)
-														
+
 														if tableTracker[tostring(v.player)] == nil then
 															DebugPrint("TABLE "..index..": "..v.player.." WAS PUT OUT DUE TO LEAVING")
 															v.player_in = false
@@ -555,7 +563,7 @@ function StartTableThread(i)
 																table.insert(v.hand, card)
 																Wait(1500)
 																DebugPrint("TABLE "..index..": DEALT "..GetPlayerName(v.player):upper().." "..card)
-																
+
 																if handValue(v.hand) == 21 then
 																	-- PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_outro")
 																	-- Wait(1500)
@@ -585,11 +593,11 @@ function StartTableThread(i)
 													if v.player_in == true then
 														PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_outro")
 														Wait(1500)
-														
+
 														PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_intro_split")
 														Wait(1500)
 														PlayDealerSpeech(index, "MINIGAME_BJACK_DEALER_ANOTHER_CARD")
-														
+
 														repeat Wait(0)
 															timeTracker[index] = 0
 															PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_split")
@@ -603,23 +611,23 @@ function StartTableThread(i)
 																move = m
 																receivedMove = true
 															end)
-														
+
 															while receivedMove == false and tableTracker[tostring(v.player)] ~= nil and timeTracker[index] < moveTime do
 																for i,v in pairs(currentPlayers) do
 																	TriggerClientEvent("BLACKJACK:SyncTimer", v.player, moveTime - timeTracker[index])
-																end	
+																end
 																Wait(1000)
-																timeTracker[index] = timeTracker[index] + 1																
+																timeTracker[index] = timeTracker[index] + 1
 															end
 															--repeat Wait(0) until receivedMove == true
 															RemoveEventHandler(eventHandler)
-															
+
 															if tableTracker[tostring(v.player)] == nil then
 																DebugPrint("TABLE "..index..": "..v.player.." WAS PUT OUT DUE TO LEAVING")
 																v.player_in = false
 																TriggerClientEvent("BLACKJACK:RetrieveCards", -1, index, v.seat)
 																break
-															else												
+															else
 																if move == "hit" then
 																	local card = takeCard(deck)
 																	TriggerClientEvent("BLACKJACK:GiveCard", -1, index, v.seat, #v.splitHand+1, card, false, true)
@@ -629,7 +637,7 @@ function StartTableThread(i)
 																	table.insert(v.splitHand, card)
 																	Wait(1500)
 																	DebugPrint("TABLE "..index..": DEALT "..GetPlayerName(v.player):upper().." "..card)
-																	
+
 																	if handValue(v.splitHand) == 21 then
 																		-- PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_outro")
 																		-- Wait(1500)
@@ -657,13 +665,13 @@ function StartTableThread(i)
 														if handValue(v.hand) > 21 and handValue(v.splitHand) > 21 then
 															v.player_in = false
 														end
-														
+
 														PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_outro_split")
 														Wait(1500)
 													end
 
 													break
-													
+
 													-- end
 												elseif move == "stand" then
 													-- PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_outro")
@@ -672,7 +680,7 @@ function StartTableThread(i)
 												end
 											end
 										end
-										
+
 										if not v.splitHand then
 											PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_dealer_focus_player_0".. 5-v.seat .."_idle_outro")
 											Wait(1500)
@@ -680,7 +688,7 @@ function StartTableThread(i)
 									end
 								end
 							end
-							
+
 							--  Remove offline players from table
 							local j = 1
 
@@ -702,14 +710,14 @@ function StartTableThread(i)
 								Wait(1000)
 								PlayDealerSpeech(index, "MINIGAME_BJACK_DEALER_"..handValue(dealerHand))
 							end
-								
+
 							if handValue(dealerHand) < 17 and ArePlayersStillIn(currentPlayers) then
 								repeat
 									local card = takeCard(deck)
 									table.insert(dealerHand, card)
-									
+
 									TriggerClientEvent("BLACKJACK:GiveCard", -1, index, 0, #dealerHand, card, #dealerHand == 1)
-									
+
 									PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_deal_card_self_second_card")
 									DebugPrint("TABLE "..index..": DEALT DEALER "..card)
 									Wait(2000)
@@ -717,20 +725,20 @@ function StartTableThread(i)
 								until handValue(dealerHand) >= 17
 							end
 						end
-						
+
 						if handValue(dealerHand) > 21 then
 							PlayDealerSpeech(index, "MINIGAME_DEALER_BUSTS")
 						-- elseif handValue(dealerHand) < 21 and ArePlayersStillIn(currentPlayers) then
 							-- PlayDealerSpeech(index, "MINIGAME_DEALER_WINS")
 						end
-						
+
 						DebugPrint("TABLE "..index..": DEALER HAS "..handValue(dealerHand))
-							
+
 						for i,v in pairs(currentPlayers) do
 							-- if v.player_in then
-							
+
 								DebugPrint("TABLE "..index..": "..GetPlayerName(v.player):upper().." HAS "..handValue(v.hand))
-						
+
 								if v.player_in == true and (handValue(v.hand) > handValue(dealerHand) or handValue(dealerHand) > 21) then -- WIN
 									if v.splitHand then
 										if handValue(v.splitHand) > handValue(dealerHand) or handValue(dealerHand) > 21 then -- WIN
@@ -771,7 +779,7 @@ function StartTableThread(i)
 								end
 							-- end
 						end
-						
+
 						if handValue(dealerHand) >= 17 then
 							PlayDealerAnim(index, "anim_casino_b@amb@casino@games@shared@dealer@", "female_dealer_reaction_impartial_var0"..math.random(1,3))
 						elseif handValue(dealerHand) > 21 then
@@ -779,21 +787,21 @@ function StartTableThread(i)
 						else
 							PlayDealerAnim(index, "anim_casino_b@amb@casino@games@shared@dealer@", "female_dealer_reaction_bad_var0"..math.random(1,3))
 						end
-						
+
 						Wait(2500)
-						
+
 						for i,v in pairs(currentPlayers) do
 							PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_retrieve_cards_player_0".. 5-v.seat)
 							Wait(500)
 							TriggerClientEvent("BLACKJACK:RetrieveCards", -1, index, v.seat)
 							Wait(1500)
-					
+
 							v.bet = 0
 							v.player_in = true
 							v.hand = {}
 							v.splitHand = nil
 						end
-						
+
 						PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_retrieve_own_cards_and_remove")
 						Wait(500)
 						TriggerClientEvent("BLACKJACK:RetrieveCards", -1, index, 0)
@@ -831,37 +839,37 @@ end)
 
 function PlayerSatDown(i, seat)
 	DebugPrint(GetPlayerName(source):upper() .. " SAT DOWN AT TABLE " .. i)
-	
+
 	-- player = source
 	-- index = i
 	-- chair = seat
-	
+
 	table.insert(players[i], {player = source, seat = seat, hand = {}, player_in = true, bet = 0})
 	tableTracker[tostring(source)] = i
-	
+
 	-- PlayDealerSpeech(i, "MINIGAME_DEALER_GREET")
-	
+
 	TriggerClientEvent("BLACKJACK:RequestBets", source, i)
-	
+
 	-- DebugPrint(#players[i])
-	
+
 	-- Citizen.CreateThread(function()
 		-- local deck = getDeck()
-		
+
 		-- local card1 = takeCard(deck)
 		-- TriggerClientEvent("BLACKJACK:GiveCard", player, index, card1)
 		-- TriggerClientEvent("BLACKJACK:ANIM:DealCard", -1, index, chair)
-		
+
 		-- Wait(3000)
-		
+
 		-- local card2 = takeCard(deck)
 		-- TriggerClientEvent("BLACKJACK:GiveCard", player, index, card2)
 		-- TriggerClientEvent("BLACKJACK:ANIM:DealCard", -1, index, chair)
 	-- end)
-	
+
 	-- local card1 = takeCard(deck)
 	-- local card2 = takeCard(deck)
-	
+
 	-- TriggerEvent('_chat:messageEntered', GetPlayerName(source), {0, 0, 0}, "has " .. handValue({card1, card2}) .. " ("..cardValue(card1)..", "..cardValue(card2)..")")
 end
 
@@ -876,7 +884,7 @@ function PlayerSatUp(i)
 
 	if num ~= nil then
 		DebugPrint(GetPlayerName(source):upper() .. " SUCCESSFULLY REMOVED FROM TABLE "..i)
-		
+
 		table.remove(players[i], num)
 		tableTracker[tostring(source)] = nil
 
@@ -894,7 +902,7 @@ function PlayerLeft()
 		DebugPrint(GetPlayerName(source):upper() .. " LEFT SERVER")
 
 		local num = FindPlayerIdx(players[playerTbl], source)
-		
+
 		if num ~= nil then
 			DebugPrint(GetPlayerName(source):upper() .. " REMOVED FROM TABLE FOR LEAVING")
 			table.remove(players[playerTbl], num)
@@ -913,9 +921,9 @@ function PlayerRemove(i)
 
 	if num ~= nil then
 		DebugPrint(GetPlayerName(source):upper() .. " SUCCESSFULLY REMOVED FROM TABLE "..i)
-		
+
 		local playerInfo = players[i][num]
-		
+
 		if playerInfo.player_in then
 			if playerInfo.bet > 0 then
 				GiveMoney(source, playerInfo.bet) -- give money back as player was removed before losing or winning?
@@ -924,7 +932,7 @@ function PlayerRemove(i)
 
 		table.remove(players[i], num)
 		tableTracker[tostring(source)] = nil
-		
+
 		PlayDealerSpeech(i, "MINIGAME_DEALER_LEAVE_NEUTRAL_GAME")
 	end
 end
