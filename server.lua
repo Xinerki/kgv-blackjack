@@ -282,7 +282,7 @@ function StartTableThread(i)
 
 							if #dealerHand == 1 then
 								PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_deal_card_self")
-								DebugPrint("TABLE "..index..": DEALT DEALER [HIDDEN]: "..card)
+								DebugPrint("TABLE "..index..": DEALT DEALER [HIDDEN] ") -- ..card) -- Add this to see the Dealer's hidden card
 							else
 								PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_deal_card_self_second_card")
 								DebugPrint("TABLE "..index..": DEALT DEALER "..card)
