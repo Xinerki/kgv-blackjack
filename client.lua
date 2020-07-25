@@ -201,11 +201,11 @@ function s2m(s)
     end
 end
 
-RegisterCommand("bet", function(source, args, rawCommand)
-	if args[1] and _DEBUG == true then
-		TriggerServerEvent("BLACKJACK:SetPlayerBet", g_seat, closestChair, args[1])
-	end
-end, false)
+-- RegisterCommand("bet", function(source, args, rawCommand)
+	-- if args[1] and _DEBUG == true then
+		-- TriggerServerEvent("BLACKJACK:SetPlayerBet", g_seat, closestChair, args[1])
+	-- end
+-- end, false)
 
 
 spawnedPeds = {}
