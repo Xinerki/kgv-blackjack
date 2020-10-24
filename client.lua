@@ -527,7 +527,7 @@ AddEventHandler("BLACKJACK:PlayDealerAnim", function(i, animDict, anim)
 		-- end
 		
 		local scene = CreateSynchronizedScene(v.coords.x, v.coords.y, v.coords.z, 0.0, 0.0, v.coords.w, 2)
-		TaskSynchronizedScene(spawnedPeds[i], scene, animDict, anim, 1000.0, -8.0, 4, 1, 1148846080, 0)
+		TaskSynchronizedScene(spawnedPeds[i], scene, animDict, anim, 8.0, 8.0, 4, 1, 1148846080, 0)
 	
 	end)
 end)
