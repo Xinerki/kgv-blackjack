@@ -219,6 +219,22 @@ end
 RegisterServerEvent("BLACKJACK:CheckPlayerBet")
 AddEventHandler("BLACKJACK:CheckPlayerBet", CheckPlayerBet)
 
+function SortPlayers(pTable)
+    local temp
+
+    for i=1,#pTable-1 do
+        for j=i+1,#pTable do
+            if pTable[i].seat < pTable[j].seat then
+                temp = pTable[i]
+                pTable[i] = pTable[j]
+                pTable[j] = temp
+            end
+        end
+    end
+
+    return pTable
+end
+
 RegisterServerEvent("BLACKJACK:ReceivedMove")
 
 function StartTableThread(i)
@@ -269,6 +285,8 @@ function StartTableThread(i)
 						local currentPlayers = {table.unpack(players[i])}
 						local deck = getDeck()
 						local dealerHand = {}
+						
+						currentPlayers = SortPlayers(currentPlayers)
 
 						local gameRunning = true
 
