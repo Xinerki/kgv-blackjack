@@ -1414,20 +1414,24 @@ function ProcessTables()
 
 								Citizen.CreateThread(function() -- Disable pause when while in-blackjack
 									local startCount = false
-									local count = 0
+									local endlooptime = nil
+									local didonece = false
 									while true do
 										Citizen.Wait(0)
 										SetPauseMenuActive(false)
 
-										if leavingBlackjack == true then
+										if not didonece and leavingBlackjack == true then
+											didonece = true
 											startCount = true
 										end
 
 										if startCount == true then
-											count = count + 1
+											endlooptime = GetGameTimer() + 3000
+											startCount = false
 										end
 
-										if count > 3000 then -- Make it so it enables 3 seconds after hitting the leave button so the pause menu doesn't show up when trying to leave
+										if endlooptime and GetGameTimer() >= endlooptime then -- Make it so it enables 3 seconds after hitting the leave button so the pause menu doesn't show up when trying to leave
+											SetPauseMenuActive(true)
 											break
 										end
 									end
