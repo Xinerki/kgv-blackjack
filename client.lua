@@ -431,8 +431,16 @@ function CreatePeds()
 	
 		dealerHand[i] = {}
 		dealerHandObjs[i] = {}
-		local model = `s_f_y_casino_01`
-
+		local models = {
+			`s_f_y_casino_01`,
+			`s_m_y_casino_01`
+		}
+		local model = models[1]
+		
+		if ((i+6) % 13) < 7 then
+			model = models[2]
+		end
+		
 		chips[i] = {}
 		
 		for x=1,4 do
