@@ -1303,7 +1303,8 @@ end)
 function ProcessTables()	
 	RequestAnimDict("anim_casino_b@amb@casino@games@shared@player@")
 	
-	while true do Wait(0)
+	while true do 
+		local Wait_Time = 1000
 		local playerPed = PlayerPedId()
 
 		if not IsEntityDead(playerPed) then
@@ -1312,6 +1313,7 @@ function ProcessTables()
 				local highStakes = v.highStakes
 				
 				if GetDistanceBetweenCoords(cord.x, cord.y, cord.z, GetEntityCoords(PlayerPedId()), true) < 3.0 then
+					Wait_Time = 5
 				
 					-- local pCoords = vector3(cord.x, cord.y, cord.z)
 					local pCoords = GetEntityCoords(PlayerPedId())
@@ -1528,7 +1530,8 @@ function ProcessTables()
 					end
 				end
 			end
-		end	
+		end
+		Wait(Wait_Time)	
 	end
 end
 
