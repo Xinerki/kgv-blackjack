@@ -51,6 +51,12 @@ customTables = {
     },
 }
 
+TableModels = {
+	`vw_prop_casino_blckjack_01`,
+	`vw_prop_casino_blckjack_01b`,
+	`h4_prop_casino_blckjack_01e`,
+}
+
 for i,v in pairs(customTables) do
 	table.insert(tables, v)
 end
