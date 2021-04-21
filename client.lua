@@ -1315,12 +1315,14 @@ function ProcessTables()
 				
 					-- local pCoords = vector3(cord.x, cord.y, cord.z)
 					local pCoords = GetEntityCoords(PlayerPedId())
-					local tableObj = GetClosestObjectOfType(pCoords, 1.0, `vw_prop_casino_blckjack_01`, false, false, false)
-					-- highStakes = false
+					local tableObj = 0
 					
-					if GetEntityCoords(tableObj) == vector3(0.0, 0.0, 0.0) then
-						tableObj = GetClosestObjectOfType(pCoords, 1.0, `vw_prop_casino_blckjack_01b`, false, false, false)
-						-- highStakes = true
+					for i = 1 , #TableModels do
+						local model = TableModels[i]
+						tableObj = GetClosestObjectOfType(pCoords, 1.0, model, false, false, false)
+						if GetEntityCoords(tableObj) ~= vector3(0.0, 0.0, 0.0) then
+							break
+						end
 					end
 					
 					if GetEntityCoords(tableObj) ~= vector3(0.0, 0.0, 0.0) then
