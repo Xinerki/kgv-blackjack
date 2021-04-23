@@ -431,8 +431,16 @@ function CreatePeds()
 	
 		dealerHand[i] = {}
 		dealerHandObjs[i] = {}
-		local model = `s_f_y_casino_01`
-
+		local models = {
+			`s_f_y_casino_01`,
+			`s_m_y_casino_01`
+		}
+		local model = models[1]
+		
+		if ((i+6) % 13) < 7 then
+			model = models[2]
+		end
+		
 		chips[i] = {}
 		
 		for x=1,4 do
@@ -1295,7 +1303,8 @@ end)
 function ProcessTables()	
 	RequestAnimDict("anim_casino_b@amb@casino@games@shared@player@")
 	
-	while true do Wait(0)
+	while true do 
+		local Wait_Time = 1000
 		local playerPed = PlayerPedId()
 
 		if not IsEntityDead(playerPed) then
@@ -1304,15 +1313,18 @@ function ProcessTables()
 				local highStakes = v.highStakes
 				
 				if GetDistanceBetweenCoords(cord.x, cord.y, cord.z, GetEntityCoords(PlayerPedId()), true) < 3.0 then
+					Wait_Time = 5
 				
 					-- local pCoords = vector3(cord.x, cord.y, cord.z)
 					local pCoords = GetEntityCoords(PlayerPedId())
-					local tableObj = GetClosestObjectOfType(pCoords, 1.0, `vw_prop_casino_blckjack_01`, false, false, false)
-					-- highStakes = false
+					local tableObj = 0
 					
-					if GetEntityCoords(tableObj) == vector3(0.0, 0.0, 0.0) then
-						tableObj = GetClosestObjectOfType(pCoords, 1.0, `vw_prop_casino_blckjack_01b`, false, false, false)
-						-- highStakes = true
+					for i = 1 , #TableModels do
+						local model = TableModels[i]
+						tableObj = GetClosestObjectOfType(pCoords, 1.0, model, false, false, false)
+						if GetEntityCoords(tableObj) ~= vector3(0.0, 0.0, 0.0) then
+							break
+						end
 					end
 					
 					if GetEntityCoords(tableObj) ~= vector3(0.0, 0.0, 0.0) then
@@ -1518,7 +1530,8 @@ function ProcessTables()
 					end
 				end
 			end
-		end	
+		end
+		Wait(Wait_Time)	
 	end
 end
 
