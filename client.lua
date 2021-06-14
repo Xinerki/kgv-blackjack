@@ -254,6 +254,7 @@ Citizen.CreateThread(function()
 				DrawTimerBar(barCount, "SPLIT", handValue(splitHand))
 			end
 			DrawTimerBar(barCount, "HAND", handValue(hand))
+			DrawTimerBar(barCount, "DEALER", dealerValue[g_seat])
 		end
 
 		if _DEBUG == true then
@@ -385,6 +386,7 @@ function IsSeatOccupied(coords, radius)
 end
 
 dealerHand = {}
+dealerValue = {}
 dealerHandObjs = {}
 handObjs = {}
 
@@ -430,6 +432,7 @@ function CreatePeds()
 	for i,v in pairs(tables) do
 	
 		dealerHand[i] = {}
+		dealerValue[i] = {}
 		dealerHandObjs[i] = {}
 		local models = {
 			`s_f_y_casino_01`,
@@ -1227,6 +1230,11 @@ AddEventHandler("BLACKJACK:RetrieveCards", function(i, seat)
 			DeleteEntity(v)
 		end
 	end
+end)
+
+RegisterNetEvent("BLACKJACK:UpdateDealerHand")
+AddEventHandler("BLACKJACK:UpdateDealerHand", function(i, v)
+	dealerValue[i] = v
 end)
 	
 RegisterNetEvent("BLACKJACK:GiveCard")

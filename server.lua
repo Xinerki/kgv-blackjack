@@ -285,6 +285,8 @@ function StartTableThread(i)
 						local currentPlayers = {table.unpack(players[i])}
 						local deck = getDeck()
 						local dealerHand = {}
+						local dealerVisibleHand = {}
+						TriggerClientEvent("BLACKJACK:UpdateDealerHand", -1, index, handValue(dealerVisibleHand))
 						
 						currentPlayers = SortPlayers(currentPlayers)
 
@@ -304,8 +306,10 @@ function StartTableThread(i)
 							else
 								PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_deal_card_self_second_card")
 								DebugPrint("TABLE "..index..": DEALT DEALER "..card)
+								table.insert(dealerVisibleHand, card)
 							end
 							Wait(2000)
+							TriggerClientEvent("BLACKJACK:UpdateDealerHand", -1, index, handValue(dealerVisibleHand))
 
 							if #dealerHand > 1 then
 								PlayDealerSpeech(index, "MINIGAME_BJACK_DEALER_"..cardValue(dealerHand[2]))
@@ -341,9 +345,11 @@ function StartTableThread(i)
 						if handValue(dealerHand) == 21 then
 							DebugPrint("TABLE "..index..": DEALER HAS BLACKJACK")
 							PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_check_and_turn_card")
+							dealerVisibleHand = dealerHand
 							Wait(2000)
 							PlayDealerSpeech(index, "MINIGAME_BJACK_DEALER_BLACKJACK")
 							TriggerClientEvent("BLACKJACK:DealerTurnOverCard", -1, index)
+							TriggerClientEvent("BLACKJACK:UpdateDealerHand", -1, index, handValue(dealerVisibleHand))
 
 							for i,v in pairs(currentPlayers) do
 								TriggerClientEvent("BLACKJACK:GameEndReaction", v.player, "bad")
@@ -725,8 +731,10 @@ function StartTableThread(i)
 								PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_turn_card")
 								Wait(1000)
 								TriggerClientEvent("BLACKJACK:DealerTurnOverCard", -1, index)
+								dealerVisibleHand = dealerHand
 								Wait(1000)
 								PlayDealerSpeech(index, "MINIGAME_BJACK_DEALER_"..handValue(dealerHand))
+								TriggerClientEvent("BLACKJACK:UpdateDealerHand", -1, index, handValue(dealerVisibleHand))
 							end
 
 							if handValue(dealerHand) < 17 and ArePlayersStillIn(currentPlayers) then
@@ -740,6 +748,7 @@ function StartTableThread(i)
 									DebugPrint("TABLE "..index..": DEALT DEALER "..card)
 									Wait(2000)
 									PlayDealerSpeech(index, "MINIGAME_BJACK_DEALER_"..handValue(dealerHand))
+									TriggerClientEvent("BLACKJACK:UpdateDealerHand", -1, index, handValue(dealerVisibleHand))
 								until handValue(dealerHand) >= 17
 							end
 						end
