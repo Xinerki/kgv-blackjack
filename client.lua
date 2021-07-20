@@ -551,13 +551,15 @@ end)
 
 RegisterNetEvent("BLACKJACK:DealerTurnOverCard")
 AddEventHandler("BLACKJACK:DealerTurnOverCard", function(i)
+    local cardX,cardY,cardZ = GetEntityCoords(dealerHandObjs[i][1])
     AttachEntityToEntity(dealerHandObjs[i][1], spawnedPeds[i], GetPedBoneIndex(spawnedPeds[i],28422), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, 0, 0, 1, 2, 1)
 	
     while not HasAnimEventFired(spawnedPeds[i],585557868) do
         Wait(0)
     end
     DetachEntity(dealerHandObjs[i][1],false,true)
-	-- SetEntityRotation(dealerHandObjs[i][1], 0.0, 0.0, tables[i].coords.w + cardRotationOffsetsDealer[1].z)
+    SetEntityCoordsNoOffset(dealerHandObjs[i][1], cardX,cardY,cardZ)
+    SetEntityRotation(dealerHandObjs[i][1], 0.0, 0.0, tables[i].coords.w + cardRotationOffsetsDealer[1].z)
 end)
 
 RegisterNetEvent("BLACKJACK:DealerCheckCard")
