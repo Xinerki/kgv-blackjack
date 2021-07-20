@@ -341,9 +341,9 @@ function StartTableThread(i)
 						if handValue(dealerHand) == 21 then
 							DebugPrint("TABLE "..index..": DEALER HAS BLACKJACK")
 							PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_check_and_turn_card")
+							TriggerClientEvent("BLACKJACK:DealerTurnOverCard", -1, index)
 							Wait(2000)
 							PlayDealerSpeech(index, "MINIGAME_BJACK_DEALER_BLACKJACK")
-							TriggerClientEvent("BLACKJACK:DealerTurnOverCard", -1, index)
 
 							for i,v in pairs(currentPlayers) do
 								TriggerClientEvent("BLACKJACK:GameEndReaction", v.player, "bad")
@@ -353,6 +353,9 @@ function StartTableThread(i)
 						elseif cardValue(dealerHand[2]) == 10 or cardValue(dealerHand[2]) == 11 then
 							DebugPrint("TABLE "..index..": DEALER HAS A 10, CHECKING..")
 							PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_check_card")
+							if ChackCardPropAnim then
+								TriggerClientEvent("BLACKJACK:DealerCheckCard", -1, index)
+							end
 							Wait(2000)
 						end
 
@@ -723,9 +726,8 @@ function StartTableThread(i)
 
 							if ArePlayersStillIn(currentPlayers) then
 								PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_turn_card")
-								Wait(1000)
 								TriggerClientEvent("BLACKJACK:DealerTurnOverCard", -1, index)
-								Wait(1000)
+								Wait(2000)
 								PlayDealerSpeech(index, "MINIGAME_BJACK_DEALER_"..handValue(dealerHand))
 							end
 
