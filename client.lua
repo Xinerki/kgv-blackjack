@@ -369,6 +369,14 @@ Citizen.CreateThread(function()
 	end
 end)
 
+function CheckGender(dealerPed)
+	local models = {
+		[`s_f_y_casino_01`] = "",
+		[`s_m_y_casino_01`] = "female_"
+	}
+	return models[GetEntityModel(dealerPed)]
+end
+
 function IsSeatOccupied(coords, radius)
 	local players = GetActivePlayers()
 	local playerId = PlayerId()
@@ -512,6 +520,8 @@ end)
 RegisterNetEvent("BLACKJACK:PlayDealerAnim")
 AddEventHandler("BLACKJACK:PlayDealerAnim", function(i, animDict, anim)
 	Citizen.CreateThread(function()
+		local Gender = CheckGender(spawnedPeds[i])
+		if Gender ~= "" then anim = string.gsub(anim, Gender,"") end
 	
 		local v = tables[i]
 		
