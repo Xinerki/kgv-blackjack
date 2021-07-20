@@ -6,6 +6,8 @@ function DebugPrint(str)
 	end
 end
 
+ChackCardPropAnim = true -- maybe player can cheat and see card when checking card
+
 tables = {
 	{
 		coords = vector4(1148.837, 269.747, -52.8409, -134.69),
