@@ -812,9 +812,9 @@ function StartTableThread(i)
 
 						for i,v in pairs(currentPlayers) do
 							PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_retrieve_cards_player_0".. 5-v.seat)
-							Wait(500)
-							TriggerClientEvent("BLACKJACK:RetrieveCards", -1, index, v.seat)
-							Wait(1500)
+							Wait(600)
+							TriggerClientEvent("BLACKJACK:RetrieveCardsWithAnim", -1, index, v.seat)
+							Wait(1400)
 
 							v.bet = 0
 							v.player_in = true
@@ -823,9 +823,9 @@ function StartTableThread(i)
 						end
 
 						PlayDealerAnim(index, "anim_casino_b@amb@casino@games@blackjack@dealer", "female_retrieve_own_cards_and_remove")
-						Wait(500)
-						TriggerClientEvent("BLACKJACK:RetrieveCards", -1, index, 0)
-						Wait(1500)
+						Wait(600)
+						TriggerClientEvent("BLACKJACK:RetrieveCardsWithAnim", -1, index, 0)
+						Wait(1400)
 
 						timeTracker[index] = 0
 
