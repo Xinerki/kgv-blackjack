@@ -1258,6 +1258,37 @@ AddEventHandler("BLACKJACK:RetrieveCards", function(i, seat)
 		end
 	end
 end)
+
+RegisterNetEvent("BLACKJACK:RetrieveCardsWithAnim")
+AddEventHandler("BLACKJACK:RetrieveCardsWithAnim", function(i, seat)
+	DebugPrint("TABLE "..i..": DELETE SEAT ".. seat .." CARDS")
+
+	if seat == 0 then
+		for x,v in pairs(dealerHandObjs[i]) do
+			AttachEntityToEntity(v, spawnedPeds[i], GetPedBoneIndex(spawnedPeds[i],28422), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, 0, 0, 1, 2, 1)
+		end
+		while not HasAnimEventFired(spawnedPeds[i],585557868) do
+			Wait(0)
+		end
+		for x,v in pairs(dealerHandObjs[i]) do
+			DeleteEntity(v)
+			dealerHandObjs[i][x] = nil
+		end
+	else
+		for x,v in pairs(handObjs[i][seat]) do
+			AttachEntityToEntity(v, spawnedPeds[i], GetPedBoneIndex(spawnedPeds[i],28422), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, 0, 0, 1, 2, 1)
+		end
+		while not HasAnimEventFired(spawnedPeds[i],585557868) do
+			Wait(0)
+		end
+		for x,v in pairs(handObjs[i][seat]) do
+			DeleteEntity(v)
+		end
+		for x,v in pairs(chips[i][5-seat]) do
+			DeleteEntity(v)
+		end
+	end
+end)
 	
 RegisterNetEvent("BLACKJACK:GiveCard")
 AddEventHandler("BLACKJACK:GiveCard", function(i, seat, handSize, card, flipped, split)
