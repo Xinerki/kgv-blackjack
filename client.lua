@@ -132,7 +132,7 @@ function CanSplitHand(hand)
 			end
 		end
 	end
-	return _DEBUG
+	return _FORCESPLIT and _DEBUG
 end
 
 --[[
@@ -488,7 +488,7 @@ function CreatePeds()
 		-- NetworkAddPedToSynchronisedScene(dealer, scene, "anim_casino_b@amb@casino@games@shared@dealer@", "idle", 2.0, -2.0, 13, 16, 1148846080, 0)
 		-- NetworkStartSynchronisedScene(scene)
 		
-		local scene = CreateSynchronizedScene(v.coords.x, v.coords.y, v.coords.z, 0.0, 0.0, v.coords.w, 2)
+		local scene = CreateSynchronizedScene(v.coords.x, v.coords.y, v.coords.z-0.025, 0.0, 0.0, v.coords.w, 2)
 		TaskSynchronizedScene(dealer, scene, "anim_casino_b@amb@casino@games@shared@dealer@", "idle", 1000.0, -8.0, 4, 1, 1148846080, 0)
 		
 		-- TaskLookAtEntity(dealer, PlayerPedId(), -1, 2048, 3)

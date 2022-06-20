@@ -1,4 +1,5 @@
 _DEBUG = false
+_FORCESPLIT = false
 
 function DebugPrint(str)
 	if _DEBUG == true and str then
