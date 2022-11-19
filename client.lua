@@ -182,6 +182,7 @@ function getChips(amount)
 end
 
 function leaveBlackjack()
+	atTable = false
 	leavingBlackjack = true
 	renderScaleform = false
 	renderTime = false
@@ -255,6 +256,10 @@ Citizen.CreateThread(function()
 			end
 			DrawTimerBar(barCount, "HAND", handValue(hand))
 			DrawTimerBar(barCount, "DEALER", dealerValue[g_seat])
+		end
+		
+		if atTable == true then
+			Citizen.InvokeNative(0x01727103dd974710, `CASINO_BLACKJACK_CAMERA`)
 		end
 
 		if _DEBUG == true then
@@ -775,12 +780,7 @@ AddEventHandler("BLACKJACK:RequestBets", function(index, _timeLeft)
 			if IsControlJustPressed(1, 204) then -- TAB / Y
 				selectedBet = tableLimit
 			elseif IsControlJustPressed(1, 202) then -- ESC / B
-				leavingBlackjack = true
-				renderScaleform = false
-				renderTime = false
-				renderBet = false
-				renderHand = false
-				selectedBet = 1
+				leaveBlackjack()
 				return
 			end
 
@@ -1406,6 +1406,7 @@ function ProcessTables()
 								Wait(50)
 								
 								SetPedCurrentWeaponVisible(PlayerPedId(), 0, true, 0, 0)
+								atTable = true
 								
 								local scene = NetworkCreateSynchronisedScene(coords, rot, 2, true, true, 1065353216, 0, 1065353216)
 								NetworkAddPedToSynchronisedScene(PlayerPedId(), scene, "anim_casino_b@amb@casino@games@shared@player@", seatAnim, 2.0, -2.0, 13, 16, 1148846080, 0)
