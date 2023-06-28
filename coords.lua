@@ -7,6 +7,12 @@ function DebugPrint(str)
 	end
 end
 
+CreateThread(function()
+	while true do Wait(0)
+		_DEBUG = GlobalState.debug
+	end
+end)
+
 tables = {
 	{
 		coords = vector4(1148.837, 269.747, -52.8409, -134.69),
